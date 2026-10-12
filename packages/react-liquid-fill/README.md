@@ -1,5 +1,7 @@
 # react-liquid-fill
 
+**[Website, live demos and docs →](https://react-liquid-fill.vercel.app)**
+
 Pour colour into icons, buttons and text. `react-liquid-fill` stacks two versions of anything and reveals the top one with an animated liquid edge, on hover, focus, scroll, or your own trigger.
 
 - One component, one hook, one pure function

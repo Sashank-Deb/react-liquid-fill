@@ -597,15 +597,19 @@ p code, li code { background: var(--code-bg); border: 1px solid var(--border); b
   .lp-install code { font-size: 12.5px; }
 }
 
-/* ---------- Pixel runner (on top of the final call to action) ---------- */
+/* ---------- Pixel fox (runs on top of the final call to action) ---------- */
 
-.lp-final { position: relative; }
+.lp-final {
+  position: relative;
+  --pr-w: 88px; /* sprite: 22×15 pixels at 4× */
+  --pr-h: 60px;
+}
 .pr-track {
   position: absolute;
   left: 28px;
   right: 28px;
   bottom: 100%;
-  height: 72px;
+  height: var(--pr-h);
   container-type: inline-size;
   pointer-events: none;
 }
@@ -613,15 +617,15 @@ p code, li code { background: var(--code-bg); border: 1px solid var(--border); b
   position: absolute;
   left: 0;
   bottom: 0;
-  width: 64px;
-  height: 72px;
+  width: var(--pr-w);
+  height: var(--pr-h);
   pointer-events: auto;
   animation: pr-run 16s linear infinite;
 }
 @keyframes pr-run {
   0% { transform: translateX(0); }
-  49% { transform: translateX(calc(100cqw - 64px)); }
-  51% { transform: translateX(calc(100cqw - 64px)); }
+  49% { transform: translateX(calc(100cqw - var(--pr-w))); }
+  51% { transform: translateX(calc(100cqw - var(--pr-w))); }
   100% { transform: translateX(0); }
 }
 /* Face the way it's running. Only the drawings are mirrored, not the button, so the liquid
@@ -669,7 +673,7 @@ p code, li code { background: var(--code-bg); border: 1px solid var(--border); b
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .pr-mover { animation: none; left: 50%; margin-left: -32px; }
+  .pr-mover { animation: none; left: 50%; margin-left: calc(var(--pr-w) / -2); }
   .pr-sprite { animation: none; }
   .pr-frame-a { animation: none; opacity: 1; }
   .pr-frame-b { animation: none; opacity: 0; }

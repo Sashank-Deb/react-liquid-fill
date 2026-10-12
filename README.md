@@ -1,5 +1,7 @@
 # react-liquid-fill
 
+**Website and docs:** https://react-liquid-fill.vercel.app
+
 Pour colour into icons, buttons and text. `react-liquid-fill` stacks two versions of anything and reveals the top one with an animated liquid edge, on hover, focus, scroll, or your own trigger.
 
 - One component, one hook, one pure function
@@ -143,7 +145,7 @@ npm run icons        # rebuild the demo logos (Devicon originals → outline + f
 
 ## Deploying the site
 
-Set `NEXT_PUBLIC_SITE_URL` to your domain (e.g. `https://react-liquid-fill.dev`). Canonical URLs, the sitemap, `robots.txt`, social cards and structured data are all built from it.
+The site is deployed at **https://react-liquid-fill.vercel.app**, which is the default in `lib/site.ts`. Canonical URLs, the sitemap, `robots.txt`, social cards and structured data are all built from it. If you move to a custom domain, set `NEXT_PUBLIC_SITE_URL` in Vercel's environment variables (or change the default).
 
 Both pages are **static**: rendered once at build time and served from the CDN, with no server work per visit. The only value that can change without a deploy is the published npm version, so each page is regenerated at most **once a day** (ISR, `revalidate = 86400`) and reads the latest version from the npm registry, falling back to `SITE.version` in `lib/site.ts`. A full redeploy isn't needed after `npm publish`.
 
