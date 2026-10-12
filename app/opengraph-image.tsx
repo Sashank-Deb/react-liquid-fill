@@ -35,8 +35,14 @@ export default function OpengraphImage() {
           {SITE.name}
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-          <div style={{ fontSize: 84, fontWeight: 700, letterSpacing: -3, lineHeight: 1 }}>Pour colour into your interface.</div>
-          <div style={{ fontSize: 32, color: "#6b6b65" }}>Liquid hover and scroll effects for React · {SITE.sizeGzip} · zero dependencies</div>
+          {/* The OG renderer needs display:flex on any div with more than one child, and
+              "text {value} text" counts as several, so text is passed as one string. */}
+          <div style={{ display: "flex", fontSize: 84, fontWeight: 700, letterSpacing: -3, lineHeight: 1 }}>
+            Pour colour into your interface.
+          </div>
+          <div style={{ display: "flex", fontSize: 32, color: "#6b6b65" }}>
+            {`Liquid hover and scroll effects for React · ${SITE.sizeGzip} · zero dependencies`}
+          </div>
         </div>
       </div>
     ),
