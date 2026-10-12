@@ -1,12 +1,14 @@
 "use client";
 
-import { LiquidFill } from "@/lib/liquid";
+import { useRef, useState } from "react";
+import { useLiquidFill } from "@/lib/liquid";
 
 /*
   A sitting pixel fox on a 17×17 grid: tall ears with cream tufts, closed happy eyes,
-  pink cheeks, white chest and a big curled tail. It hops along the band (CSS); the greyscale
-  copy is the base and the colour copy is poured in by LiquidFill from the side the pointer
-  comes from, or on tap on touch screens.
+  pink cheeks, white chest and a big curled tail. It never stops hopping along the band (CSS).
+  The greyscale copy is the base; the colour copy is poured in by useLiquidFill:
+    - hover: pours in from the side the pointer comes from, drains when it leaves
+    - click / tap / Enter: keeps the colour after the pointer leaves; click again to let it drain
 
   Key: K outline · O fur · o fur shade · W white · w cream · P cheek · E eye / nose / paws · . empty
 */
@@ -84,21 +86,58 @@ function Sprite({ palette }: { palette: Palette }) {
 
 /** A fox that hops back and forth along the top edge of its positioned parent. */
 export function PixelRunner() {
+  const art = useRef<HTMLSpanElement>(null);
+  const hovering = useRef(false);
+  const [kept, setKept] = useState(false);
+  const keptRef = useRef(false);
+
+  // Manual trigger: hover and click are handled below so a click can keep the colour.
+  const liquid = useLiquidFill<HTMLButtonElement>({
+    trigger: "manual",
+    duration: { in: 560, out: 400 },
+    wave: { amplitude: 0.22 },
+    measureRef: art,
+  });
+
+  const toggleKept = (e: React.MouseEvent) => {
+    const next = !keptRef.current;
+    keptRef.current = next;
+    setKept(next);
+    if (next) liquid.fill(e.detail > 0 ? e : "up"); // from the pointer, or rising for keyboard
+    else if (!hovering.current) liquid.drain();
+  };
+
   return (
     <div className="pr-track">
       <div className="pr-mover">
-        <LiquidFill
-          as="button"
+        <button
+          ref={liquid.ref}
           type="button"
           className="pr-runner"
-          layersClassName="pr-body"
-          aria-label="Pixel fox. Hover or tap to pour colour into it."
-          touch="tap-toggle"
-          duration={{ in: 560, out: 400 }}
-          wave={{ amplitude: 0.22 }}
-          base={<Sprite palette={GREY} />}
-          fill={<Sprite palette={COLOUR} />}
-        />
+          aria-label="Pixel fox. Hover to pour colour into it, or click to keep the colour."
+          aria-pressed={kept}
+          data-filled={liquid.filled || undefined}
+          onPointerEnter={(e) => {
+            if (e.pointerType === "touch") return; // taps arrive as clicks
+            hovering.current = true;
+            liquid.fill(e);
+          }}
+          onPointerLeave={(e) => {
+            if (e.pointerType === "touch") return;
+            hovering.current = false;
+            if (!keptRef.current) liquid.drain();
+          }}
+          onClick={toggleKept}
+        >
+          <span ref={art} className="pr-body">
+            <span className="pr-layer">
+              <Sprite palette={GREY} />
+            </span>
+            <span className="pr-layer pr-ink" aria-hidden="true">
+              <Sprite palette={COLOUR} />
+            </span>
+          </span>
+        </button>
       </div>
     </div>
   );
