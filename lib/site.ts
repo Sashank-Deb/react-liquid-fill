@@ -8,12 +8,12 @@ export const SITE = {
   description:
     "Pour colour into icons, buttons and text. A tiny React component and hook for liquid fill effects on hover, focus or scroll. Under 3 kB, zero dependencies.",
   /** The deployed site. NEXT_PUBLIC_SITE_URL overrides it (e.g. for a custom domain later). No trailing slash. */
-  url: (process.env.NEXT_PUBLIC_SITE_URL ?? "https://react-liquid-fill.vercel.app").replace(/\/+$/, ""),
+  url: (process.env.NEXT_PUBLIC_SITE_URL ?? "https://react-liquid-fill.com").replace(/\/+$/, ""),
   repo: "https://github.com/Sashank-Deb/react-liquid-fill",
   npm: "https://www.npmjs.com/package/react-liquid-fill",
   author: "Sashank Deb",
   /** Fallback when the npm registry can't be reached at build time (see lib/npm.ts). */
-  version: "0.1.1",
+  version: "0.1.2",
   sizeGzip: "2.7 kB",
   keywords: [
     "react hover effect",

@@ -6,6 +6,8 @@ import { UseCases } from "@/components/landing/UseCases";
 import { FinalCta } from "@/components/landing/FinalCta";
 import { CodeBlock } from "@/components/docs/CodeBlock";
 import { quickStart } from "@/docs/snippets";
+import { BrandMark } from "@/components/ui/BrandMark";
+import { ThemeToggle } from "@/components/ui/ThemeToggle";
 
 const features = [
   { title: "Any content", text: "Icons, logos, images, buttons, links, headings. If it renders, it can fill. Bring your own icon set." },
@@ -78,7 +80,7 @@ export function Landing({ version }: { version: string }) {
 
       <header className="lp-header">
         <a href="#top" className="brand">
-          <span className="brand-mark" aria-hidden="true" />
+          <BrandMark />
           {SITE.name}
         </a>
         <nav className="lp-nav" aria-label="Main">
@@ -90,6 +92,7 @@ export function Landing({ version }: { version: string }) {
         <a href={DOCS_HREF} className="lp-header-cta">
           Discover the core library
         </a>
+        <ThemeToggle />
       </header>
 
       <main id="top">

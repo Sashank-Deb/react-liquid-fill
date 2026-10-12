@@ -1,6 +1,6 @@
 # react-liquid-fill
 
-**Website and docs:** https://react-liquid-fill.vercel.app
+**Website and docs:** https://react-liquid-fill.com
 
 Pour colour into icons, buttons and text. `react-liquid-fill` stacks two versions of anything and reveals the top one with an animated liquid edge, on hover, focus, scroll, or your own trigger.
 
@@ -145,11 +145,11 @@ npm run icons        # rebuild the demo logos (Devicon originals → outline + f
 
 ## Deploying the site
 
-The site is deployed at **https://react-liquid-fill.vercel.app**, which is the default in `lib/site.ts`. Canonical URLs, the sitemap, `robots.txt`, social cards and structured data are all built from it. If you move to a custom domain, set `NEXT_PUBLIC_SITE_URL` in Vercel's environment variables (or change the default).
+The site is deployed at **https://react-liquid-fill.com**, which is the default in `lib/site.ts`. Canonical URLs, the sitemap, `robots.txt`, social cards and structured data are all built from it. To serve it from a different domain, set `NEXT_PUBLIC_SITE_URL` in Vercel's environment variables (or change the default).
 
 Both pages are **static**: rendered once at build time and served from the CDN, with no server work per visit. The only value that can change without a deploy is the published npm version, so each page is regenerated at most **once a day** (ISR, `revalidate = 86400`) and reads the latest version from the npm registry, falling back to `SITE.version` in `lib/site.ts`. A full redeploy isn't needed after `npm publish`.
 
-SEO files live in `app/`: `icon.svg` and `favicon.ico` (favicons), `apple-icon.tsx`, `manifest.ts`, `opengraph-image.tsx` (home) and `docs/opengraph-image.tsx` (docs), `sitemap.ts` and `robots.ts`. Images generated with `next/og` need `display: flex` on any `<div>` with more than one child.
+SEO files live in `app/`: `icon.svg` and `favicon.ico` (favicons), `apple-icon.tsx`, `manifest.ts`, `opengraph-image.png` and `twitter-image.png` (social cards, 1600 × 840, in `app/` and `app/docs/`), `sitemap.ts` and `robots.ts`. `apple-icon.tsx` is generated with `next/og`, which needs `display: flex` on any `<div>` with more than one child.
 
 ## Publishing to npm
 

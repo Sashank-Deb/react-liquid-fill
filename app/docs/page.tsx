@@ -17,7 +17,7 @@ export const metadata: Metadata = {
   description,
   alternates: { canonical: "/docs" },
   // openGraph and twitter replace the site-wide values rather than merging, so repeat the shared fields.
-  // The image comes from app/docs/opengraph-image.tsx.
+  // The social image is app/docs/opengraph-image.png (and twitter-image.png).
   openGraph: {
     type: "article",
     siteName: SITE.name,

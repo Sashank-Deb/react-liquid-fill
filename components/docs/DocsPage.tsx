@@ -10,6 +10,8 @@ import { SideNav, type NavGroup } from "@/components/docs/SideNav";
 import { dataAttributes, hookOptions, hookReturns, liquidFillProps, PACKAGE, polygonInput } from "@/docs/api";
 import * as snippets from "@/docs/snippets";
 import { HOME_HREF, SITE } from "@/lib/site";
+import { BrandMark } from "@/components/ui/BrandMark";
+import { ThemeToggle } from "@/components/ui/ThemeToggle";
 
 
 const nav: NavGroup[] = [
@@ -77,12 +79,13 @@ export function DocsPage({ version }: { version: string }) {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <header className="topbar">
         <a href={HOME_HREF} className="brand">
-          <span className="brand-mark" aria-hidden="true" />
+          <BrandMark />
           {PACKAGE}
         </a>
         <span className="chip">v{version}</span>
         <span className="topbar-crumb">Docs</span>
         <code className="topbar-install">npm i {PACKAGE}</code>
+        <ThemeToggle />
       </header>
 
       <div className="docs">

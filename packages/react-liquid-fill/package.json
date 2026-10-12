@@ -1,6 +1,6 @@
 {
   "name": "react-liquid-fill",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Pour colour into icons, buttons and text. A tiny React component and hook that reveals content with an animated liquid edge on hover, focus or scroll.",
   "keywords": [
     "react",
@@ -16,7 +16,7 @@
   ],
   "license": "MIT",
   "author": "Sashank Deb",
-  "homepage": "https://react-liquid-fill.vercel.app/",
+  "homepage": "https://react-liquid-fill.com/",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Sashank-Deb/react-liquid-fill.git",
