@@ -1,0 +1,130 @@
+[
+  {
+    "name": "TypeScript",
+    "slug": "typescript",
+    "devicon": "typescript/typescript-original"
+  },
+  {
+    "name": "JavaScript",
+    "slug": "javascript",
+    "devicon": "javascript/javascript-original"
+  },
+  {
+    "name": "Python",
+    "slug": "python",
+    "devicon": "python/python-original"
+  },
+  {
+    "name": "React",
+    "slug": "react",
+    "devicon": "react/react-original"
+  },
+  {
+    "name": "Next.js",
+    "slug": "nextjs",
+    "devicon": "nextjs/nextjs-original",
+    "darkInvert": true
+  },
+  {
+    "name": "Angular",
+    "slug": "angular",
+    "devicon": "angular/angular-original"
+  },
+  {
+    "name": "Vue",
+    "slug": "vuejs",
+    "devicon": "vuejs/vuejs-original"
+  },
+  {
+    "name": "Rust",
+    "slug": "rust",
+    "devicon": "rust/rust-original",
+    "darkInvert": true
+  },
+  {
+    "name": "Tailwind CSS",
+    "slug": "tailwindcss",
+    "devicon": "tailwindcss/tailwindcss-original"
+  },
+  {
+    "name": "Node.js",
+    "slug": "nodejs",
+    "devicon": "nodejs/nodejs-original"
+  },
+  {
+    "name": "Bun",
+    "slug": "bun",
+    "devicon": "bun/bun-original"
+  },
+  {
+    "name": "Vite",
+    "slug": "vitejs",
+    "devicon": "vitejs/vitejs-original"
+  },
+  {
+    "name": "Docker",
+    "slug": "docker",
+    "devicon": "docker/docker-original"
+  },
+  {
+    "name": "PostgreSQL",
+    "slug": "postgresql",
+    "devicon": "postgresql/postgresql-original"
+  },
+  {
+    "name": "Supabase",
+    "slug": "supabase",
+    "devicon": "supabase/supabase-original"
+  },
+  {
+    "name": "Redis",
+    "slug": "redis",
+    "devicon": "redis/redis-original"
+  },
+  {
+    "name": "FastAPI",
+    "slug": "fastapi",
+    "devicon": "fastapi/fastapi-original"
+  },
+  {
+    "name": "Django",
+    "slug": "django",
+    "devicon": "django/django-plain",
+    "darkInvert": true
+  },
+  {
+    "name": "LangChain",
+    "slug": "langchain",
+    "darkInvert": true,
+    "fallback": {
+      "color": "#1C3C3C",
+      "path": "M13.796 0a6.93 6.93 0 0 0-4.91 2.019L5.451 5.455l3.273 3.27 3.432-3.432a2.284 2.284 0 0 1 3.277 0 2.28 2.28 0 0 1 0 3.275L12 12.001l3.273 3.273 3.433-3.435c2.692-2.692 2.692-7.127 0-9.82A6.92 6.92 0 0 0 13.796 0m-5.07 8.728-3.433 3.434c-2.692 2.693-2.692 7.126 0 9.819A6.92 6.92 0 0 0 10.203 24a6.93 6.93 0 0 0 4.911-2.02l3.432-3.432-3.271-3.272-3.433 3.433a2.284 2.284 0 0 1-3.277 0 2.28 2.28 0 0 1 0-3.276L12 12z"
+    }
+  },
+  {
+    "name": "PyTorch",
+    "slug": "pytorch",
+    "devicon": "pytorch/pytorch-original"
+  },
+  {
+    "name": "Vitest",
+    "slug": "vitest",
+    "devicon": "vitest/vitest-original"
+  },
+  {
+    "name": "Playwright",
+    "slug": "playwright",
+    "devicon": "playwright/playwright-original"
+  },
+  {
+    "name": "GitHub Actions",
+    "slug": "githubactions",
+    "devicon": "githubactions/githubactions-original"
+  },
+  {
+    "name": "Vercel",
+    "slug": "vercel",
+    "devicon": "vercel/vercel-original",
+    "darkInvert": true
+  }
+]
