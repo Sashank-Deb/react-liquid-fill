@@ -90,7 +90,7 @@ export function Landing({ version }: { version: string }) {
           <a href="#faq">FAQ</a>
         </nav>
         <a href={DOCS_HREF} className="lp-header-cta">
-          Discover the core library
+          Docs
         </a>
         <ThemeToggle />
       </header>
