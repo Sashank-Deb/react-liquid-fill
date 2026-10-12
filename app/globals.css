@@ -699,3 +699,92 @@ p code, li code { background: var(--code-bg); border: 1px solid var(--border); b
 .lp-footer-links { display: flex; gap: 18px; }
 .lp-footer-links a { color: var(--secondary); text-decoration: none; }
 .lp-footer-links a:hover { color: var(--foreground); }
+
+/* ---------- Pixel meadow, poured into the final band when the fox is coloured ---------- */
+
+.lp-final > h2,
+.lp-final > p,
+.lp-final > a { position: relative; z-index: 1; transition: color 0.45s ease, text-shadow 0.45s ease; }
+.lp-final .pr-track { z-index: 2; }
+
+.meadow {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  overflow: hidden;
+  /* the band's useLiquidFill writes --liquid-clip on .lp-final; the meadow is what it reveals */
+  clip-path: var(--liquid-clip, inset(0 100% 0 0));
+  /* stepped greens, like a pixel-art backdrop */
+  background: linear-gradient(180deg, #4f8f40 0 14%, #437f39 14% 36%, #386f33 36% 62%, #2e602e 62% 100%);
+  pointer-events: none;
+}
+.meadow-ground { position: absolute; inset: 0; display: block; }
+
+/* grass blades on the top edge, in front of the fox's paws */
+.meadow-edge {
+  position: absolute;
+  left: 22px;
+  right: 22px;
+  bottom: calc(100% - 4px);
+  z-index: 3;
+  display: block;
+  opacity: 0;
+  transition: opacity 0.5s ease 0.3s;
+  pointer-events: none;
+}
+.lp-final[data-scene] .meadow-edge { opacity: 1; }
+
+/* light text with a pixel drop shadow while the meadow is showing */
+.lp-final[data-scene] > h2,
+.lp-final[data-scene] > p { color: #fbf6e9; text-shadow: 0 3px 0 rgb(18 40 20 / 0.55); }
+.lp-final[data-scene] > p { opacity: 1; text-shadow: 0 2px 0 rgb(18 40 20 / 0.7); }
+/* a soft shade behind the text so it stays readable over the texture */
+.meadow::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 46% 52% at 50% 50%, rgb(20 46 22 / 0.55), transparent 75%);
+}
+
+/* leaves drifting down */
+.meadow-falling { position: absolute; inset: 0; container-type: size; }
+.meadow-leaf {
+  position: absolute;
+  top: -20px;
+  display: block;
+  animation-name: meadow-leaf-fall;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  animation-play-state: paused;
+}
+.lp-final[data-scene] .meadow-leaf { animation-play-state: running; }
+@keyframes meadow-leaf-fall {
+  0% { transform: translate(0, 0) rotate(0deg); }
+  25% { transform: translate(14px, 25cqh) rotate(22deg); }
+  50% { transform: translate(-10px, 50cqh) rotate(-14deg); }
+  75% { transform: translate(12px, 75cqh) rotate(18deg); }
+  100% { transform: translate(0, calc(100cqh + 28px)) rotate(0deg); }
+}
+
+/* footsteps on/off */
+.meadow-sound {
+  position: absolute;
+  top: 14px;
+  right: 16px;
+  z-index: 2;
+  font: 500 12px/1 var(--font-mono);
+  color: #fbf6e9;
+  background: rgb(18 40 20 / 0.35);
+  border: 2px solid currentColor;
+  border-radius: 0;
+  padding: 6px 10px;
+  cursor: pointer;
+  animation: lp-swap-in 0.3s ease both;
+}
+.meadow-sound[aria-pressed="false"] { opacity: 0.7; }
+.meadow-sound:focus-visible { outline: 2px solid #fbf6e9; outline-offset: 2px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .meadow-leaf { display: none; }
+  .meadow-edge { transition: none; }
+}

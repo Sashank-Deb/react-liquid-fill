@@ -3,7 +3,7 @@ import { HeroShowcase } from "@/components/landing/HeroShowcase";
 import { InstallChip } from "@/components/landing/InstallChip";
 import { Playground } from "@/components/landing/Playground";
 import { UseCases } from "@/components/landing/UseCases";
-import { PixelRunner } from "@/components/landing/PixelRunner";
+import { FinalCta } from "@/components/landing/FinalCta";
 import { CodeBlock } from "@/components/docs/CodeBlock";
 import { quickStart } from "@/docs/snippets";
 
@@ -188,14 +188,7 @@ export function Landing({ version }: { version: string }) {
           </div>
         </section>
 
-        <section className="lp-final" aria-labelledby="final-title">
-          <PixelRunner />
-          <h2 id="final-title">Ready to pour?</h2>
-          <p>Installation, live demos, guides for every icon set and the full API.</p>
-          <a href={DOCS_HREF} className="lp-btn lp-btn-primary">
-            Discover the core library <span aria-hidden="true">→</span>
-          </a>
-        </section>
+        <FinalCta docsHref={DOCS_HREF} />
       </main>
 
       <footer className="lp-footer">

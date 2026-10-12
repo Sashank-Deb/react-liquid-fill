@@ -1,17 +1,16 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useLiquidFill } from "@/lib/liquid";
+import { playStep, unlockAudio } from "./footsteps";
 
 /*
   A pixel fox on a 17×18 grid: tall ears with cream tufts, closed happy eyes, pink cheeks,
   white chest and a big curled tail. Eight frames make the walk cycle: each paw lifts in turn,
   the tail swishes, and the body rises between steps with the ears trailing a pixel behind.
   CSS steps through them and adds a matching lean; the fox never stops walking along the band.
-  The greyscale copy is the base; the colour copy is poured in by useLiquidFill:
-    - hover: pours in from the side the pointer comes from, drains when it leaves
-    - click / tap / Enter: flips the colour (grey → colour, colour → grey) and the fox hops;
-      colour set by a click stays after the pointer leaves
+  The greyscale copy is the base; the colour copy is poured in by useLiquidFill.
+  Each click / tap / Enter flips the colour (grey → colour, colour → grey) and the fox hops.
 
   Key: K outline · O fur · o fur shade · W white · w cream · P cheek · E eye / nose / paws · . empty
 */
@@ -242,14 +241,21 @@ function Sprite({ palette }: { palette: Palette }) {
   );
 }
 
-/** A fox that walks back and forth along the top edge of its positioned parent. */
-export function PixelRunner() {
-  const art = useRef<HTMLSpanElement>(null);
-  const hovering = useRef(false);
-  const [kept, setKept] = useState(false);
-  const keptRef = useRef(false);
+type Point = { clientX: number; clientY: number };
 
-  // Manual trigger: hover and click are handled below so a click can keep the colour.
+type PixelRunnerProps = {
+  /** Called after every click with the new state and the fox's centre (for pouring a scene from it). */
+  onColourChange?: (coloured: boolean, from: Point) => void;
+  /** Play footsteps in time with the walk cycle (only after a click has unlocked audio). */
+  footsteps?: boolean;
+};
+
+/** A fox that walks back and forth along the top edge of its positioned parent. */
+export function PixelRunner({ onColourChange, footsteps = false }: PixelRunnerProps) {
+  const art = useRef<HTMLSpanElement>(null);
+  const [coloured, setColoured] = useState(false);
+
+  // Manual trigger: only clicks change the colour.
   const liquid = useLiquidFill<HTMLButtonElement>({
     trigger: "manual",
     duration: { in: 560, out: 400 },
@@ -265,16 +271,42 @@ export function PixelRunner() {
     el.classList.add("is-hopping");
   };
 
-  // Every click flips what's on screen: grey → colour (kept after the pointer leaves),
-  // colour → grey. And the fox hops each time.
-  const flip = (e: React.MouseEvent) => {
-    const coloured = liquid.getProgress() > 0.5;
-    keptRef.current = !coloured;
-    setKept(!coloured);
-    if (coloured) liquid.drain();
-    else liquid.fill(e.detail > 0 ? e : "up"); // from the pointer, or rising for keyboard
+  // Every click flips the colour and makes the fox hop.
+  const flip = (e: React.MouseEvent<HTMLButtonElement>) => {
+    const next = liquid.getProgress() <= 0.5;
+    setColoured(next);
+    if (next) {
+      unlockAudio(); // inside the click, so the browser allows sound
+      liquid.fill(e.detail > 0 ? e : "up"); // from the pointer, or rising for keyboard
+    } else {
+      liquid.drain();
+    }
     hop();
+    const r = e.currentTarget.getBoundingClientRect();
+    onColourChange?.(next, { clientX: r.left + r.width / 2, clientY: r.top + r.height / 2 });
   };
+
+  // Footsteps: watch the walk cycle and play a step when a lifted paw lands (frames 3 and 7).
+  useEffect(() => {
+    if (!footsteps) return;
+    const frameEl = art.current?.querySelector(".pr-f1");
+    const anim = frameEl?.getAnimations()[0];
+    if (!anim) return; // reduced motion: no walk, no steps
+    let last = -1;
+    let raf = 0;
+    const tick = () => {
+      const duration = Number(anim.effect?.getTiming().duration) || 880;
+      const t = Number(anim.currentTime ?? 0);
+      const frame = Math.floor((((t % duration) + duration) % duration) / (duration / 8));
+      if (frame !== last) {
+        if (frame === 2 || frame === 6) playStep();
+        last = frame;
+      }
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [footsteps]);
 
   return (
     <div className="pr-track">
@@ -283,18 +315,8 @@ export function PixelRunner() {
           ref={liquid.ref}
           type="button"
           className="pr-runner"
-          aria-label="Pixel fox. Hover to pour colour into it; click to switch the colour on or off."
-          aria-pressed={kept}
-          onPointerEnter={(e) => {
-            if (e.pointerType === "touch") return; // taps arrive as clicks
-            hovering.current = true;
-            liquid.fill(e);
-          }}
-          onPointerLeave={(e) => {
-            if (e.pointerType === "touch") return;
-            hovering.current = false;
-            if (!keptRef.current) liquid.drain();
-          }}
+          aria-label="Pixel fox. Click to switch the colour on or off."
+          aria-pressed={coloured}
           onClick={flip}
         >
           <span ref={art} className="pr-body" onAnimationEnd={(e) => e.currentTarget.classList.remove("is-hopping")}>
