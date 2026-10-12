@@ -5,17 +5,18 @@ import { useLiquidFill } from "@/lib/liquid";
 
 /*
   A pixel fox on a 17×18 grid: tall ears with cream tufts, closed happy eyes, pink cheeks,
-  white chest and a big curled tail. Four frames make a walk cycle (each paw lifts in turn and
-  the body rises a pixel between steps); CSS steps through them and adds a matching lean, and the
-  fox never stops walking along the band.
+  white chest and a big curled tail. Eight frames make the walk cycle: each paw lifts in turn,
+  the tail swishes, and the body rises between steps with the ears trailing a pixel behind.
+  CSS steps through them and adds a matching lean; the fox never stops walking along the band.
   The greyscale copy is the base; the colour copy is poured in by useLiquidFill:
     - hover: pours in from the side the pointer comes from, drains when it leaves
-    - click / tap / Enter: keeps the colour after the pointer leaves; click again to let it drain
+    - click / tap / Enter: flips the colour (grey → colour, colour → grey) and the fox hops;
+      colour set by a click stays after the pointer leaves
 
   Key: K outline · O fur · o fur shade · W white · w cream · P cheek · E eye / nose / paws · . empty
 */
 const FRAMES = [
-  // left paw lifted, body low
+  // 1. left paw up, body low
   [
     ".................",
     ".....K.........K.",
@@ -36,7 +37,49 @@ const FRAMES = [
     "...KKooKoEWEoK...",
     ".....KKKK.KEKK...",
   ],
-  // passing, body high
+  // 2. left paw up, tail swish
+  [
+    ".................",
+    ".....K.........K.",
+    "....KoK.......KoK",
+    "....KwoK.....KowK",
+    "....KWoOKKKKKOoWK",
+    "....KWOOOOOOOOOWK",
+    ".K..KOOOOOOOOOOOK",
+    "KWK.KOOOOOOOOOOOK",
+    "KWWKKOOOOOOOOOOOK",
+    "KWWWKWWEEOOOEEWWK",
+    "KWWWKWPPWWOWWPPWK",
+    "KWWWKWWWWWEWWWWWK",
+    "KWWOOKWWWWWWWWWK.",
+    ".KOOOOKKoWWWOKK..",
+    ".KoOOOoKOWWWwK...",
+    "..KooooKoEWWOK...",
+    "...KKooKoEWEoK...",
+    ".....KKKK.KEKK...",
+  ],
+  // 3. passing, body high, ears lag
+  [
+    ".................",
+    ".....K.........K.",
+    "....KoKK.....KKoK",
+    "....KwoOKKKKKOowK",
+    "....KWOOOOOOOOOWK",
+    "....KOOOOOOOOOOOK",
+    ".K..KOOOOOOOOOOOK",
+    "KWK.KOOOOOOOOOOOK",
+    "KWWKKWWEEOOOEEWWK",
+    "KWWWKWPPWWOWWPPWK",
+    "KWWWKWWWWWEWWWWWK",
+    "KWWOOKWWWWWWWWWK.",
+    ".KOOOOKKoWWWOKK..",
+    ".KoOOOoKOWWWwK...",
+    "..KooooKoWWWOK...",
+    "..KooooKoWWWOK...",
+    "...KKooKoEWEoK...",
+    ".....KKKKEKEKK...",
+  ],
+  // 4. passing, body high, ears catch up
   [
     ".....K.........K.",
     "....KoK.......KoK",
@@ -57,7 +100,7 @@ const FRAMES = [
     "...KKooKoEWEoK...",
     ".....KKKKEKEKK...",
   ],
-  // right paw lifted, body low
+  // 5. right paw up, body low
   [
     ".................",
     ".....K.........K.",
@@ -78,7 +121,49 @@ const FRAMES = [
     "...KKooKoEWEoK...",
     ".....KKKKEK.KK...",
   ],
-  // passing, body high
+  // 6. right paw up, tail swish
+  [
+    ".................",
+    ".....K.........K.",
+    "....KoK.......KoK",
+    "....KwoK.....KowK",
+    "....KWoOKKKKKOoWK",
+    "....KWOOOOOOOOOWK",
+    ".K..KOOOOOOOOOOOK",
+    "KWK.KOOOOOOOOOOOK",
+    "KWWKKOOOOOOOOOOOK",
+    "KWWWKWWEEOOOEEWWK",
+    "KWWWKWPPWWOWWPPWK",
+    "KWWWKWWWWWEWWWWWK",
+    "KWWOOKWWWWWWWWWK.",
+    ".KOOOOKKoWWWOKK..",
+    ".KoOOOoKOWWWwK...",
+    "..KooooKoWWEOK...",
+    "...KKooKoEWEoK...",
+    ".....KKKKEK.KK...",
+  ],
+  // 7. passing, body high, ears lag
+  [
+    ".................",
+    ".....K.........K.",
+    "....KoKK.....KKoK",
+    "....KwoOKKKKKOowK",
+    "....KWOOOOOOOOOWK",
+    "....KOOOOOOOOOOOK",
+    ".K..KOOOOOOOOOOOK",
+    "KWK.KOOOOOOOOOOOK",
+    "KWWKKWWEEOOOEEWWK",
+    "KWWWKWPPWWOWWPPWK",
+    "KWWWKWWWWWEWWWWWK",
+    "KWWOOKWWWWWWWWWK.",
+    ".KOOOOKKoWWWOKK..",
+    ".KoOOOoKOWWWwK...",
+    "..KooooKoWWWOK...",
+    "..KooooKoWWWOK...",
+    "...KKooKoEWEoK...",
+    ".....KKKKEKEKK...",
+  ],
+  // 8. passing, body high, ears catch up
   [
     ".....K.........K.",
     "....KoK.......KoK",
@@ -172,12 +257,23 @@ export function PixelRunner() {
     measureRef: art,
   });
 
-  const toggleKept = (e: React.MouseEvent) => {
-    const next = !keptRef.current;
-    keptRef.current = next;
-    setKept(next);
-    if (next) liquid.fill(e.detail > 0 ? e : "up"); // from the pointer, or rising for keyboard
-    else if (!hovering.current) liquid.drain();
+  const hop = () => {
+    const el = art.current;
+    if (!el) return;
+    el.classList.remove("is-hopping");
+    void el.offsetWidth; // restart the animation even if a hop is still running
+    el.classList.add("is-hopping");
+  };
+
+  // Every click flips what's on screen: grey → colour (kept after the pointer leaves),
+  // colour → grey. And the fox hops each time.
+  const flip = (e: React.MouseEvent) => {
+    const coloured = liquid.getProgress() > 0.5;
+    keptRef.current = !coloured;
+    setKept(!coloured);
+    if (coloured) liquid.drain();
+    else liquid.fill(e.detail > 0 ? e : "up"); // from the pointer, or rising for keyboard
+    hop();
   };
 
   return (
@@ -187,9 +283,8 @@ export function PixelRunner() {
           ref={liquid.ref}
           type="button"
           className="pr-runner"
-          aria-label="Pixel fox. Hover to pour colour into it, or click to keep the colour."
+          aria-label="Pixel fox. Hover to pour colour into it; click to switch the colour on or off."
           aria-pressed={kept}
-          data-filled={liquid.filled || undefined}
           onPointerEnter={(e) => {
             if (e.pointerType === "touch") return; // taps arrive as clicks
             hovering.current = true;
@@ -200,9 +295,9 @@ export function PixelRunner() {
             hovering.current = false;
             if (!keptRef.current) liquid.drain();
           }}
-          onClick={toggleKept}
+          onClick={flip}
         >
-          <span ref={art} className="pr-body">
+          <span ref={art} className="pr-body" onAnimationEnd={(e) => e.currentTarget.classList.remove("is-hopping")}>
             <span className="pr-layer">
               <Sprite palette={GREY} />
             </span>

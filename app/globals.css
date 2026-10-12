@@ -603,7 +603,7 @@ p code, li code { background: var(--code-bg); border: 1px solid var(--border); b
   position: relative;
   --pr-w: 68px; /* sprite: 17×18 pixels at 4× */
   --pr-h: 72px;
-  --pr-step: 0.56s; /* one full walk cycle: four frames */
+  --pr-step: 0.88s; /* one full walk cycle: eight frames, 110ms each */
 }
 .pr-track {
   position: absolute;
@@ -650,16 +650,20 @@ p code, li code { background: var(--code-bg); border: 1px solid var(--border); b
 .pr-runner:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
 .pr-sprite { display: block; image-rendering: pixelated; transform-origin: center; }
 
-/* Walk cycle: show one of four frames at a time, in order. Every frame runs the same
-   keyframes (visible for the first quarter), offset by a quarter cycle each. */
+/* Walk cycle: show one of eight frames at a time, in order. Every frame runs the same
+   keyframes (visible for the first eighth), offset by an eighth of the cycle each. */
 .pr-f { opacity: 0; animation: pr-frame var(--pr-step) steps(1, end) infinite; }
 .pr-f1 { animation-delay: 0s; }
-.pr-f2 { animation-delay: calc(var(--pr-step) * -0.75); }
-.pr-f3 { animation-delay: calc(var(--pr-step) * -0.5); }
-.pr-f4 { animation-delay: calc(var(--pr-step) * -0.25); }
+.pr-f2 { animation-delay: calc(var(--pr-step) * -7/8); }
+.pr-f3 { animation-delay: calc(var(--pr-step) * -6/8); }
+.pr-f4 { animation-delay: calc(var(--pr-step) * -5/8); }
+.pr-f5 { animation-delay: calc(var(--pr-step) * -4/8); }
+.pr-f6 { animation-delay: calc(var(--pr-step) * -3/8); }
+.pr-f7 { animation-delay: calc(var(--pr-step) * -2/8); }
+.pr-f8 { animation-delay: calc(var(--pr-step) * -1/8); }
 @keyframes pr-frame {
   0% { opacity: 1; }
-  25%, 100% { opacity: 0; }
+  12.5%, 100% { opacity: 0; }
 }
 
 /* lean into each step, in time with the frames */
@@ -676,8 +680,8 @@ p code, li code { background: var(--code-bg); border: 1px solid var(--border); b
 .pr-layer { grid-area: 1 / 1; display: block; }
 .pr-ink { clip-path: var(--liquid-clip, inset(0 100% 0 0)); }
 
-/* a little hop when the colour finishes pouring in */
-.pr-runner[data-filled] .pr-body { animation: pr-hop 0.42s cubic-bezier(0.3, 0.7, 0.4, 1) 1; }
+/* a hop on every click (the class is re-added by script to restart it) */
+.pr-body.is-hopping { animation: pr-hop 0.42s cubic-bezier(0.3, 0.7, 0.4, 1) 1; }
 @keyframes pr-hop {
   0%, 100% { transform: translateY(0); }
   45% { transform: translateY(-14px); }
@@ -689,7 +693,7 @@ p code, li code { background: var(--code-bg); border: 1px solid var(--border); b
   .pr-runner { animation: none; }
   .pr-f { animation: none; }
   .pr-f1 { opacity: 1; }
-  .pr-runner[data-filled] .pr-body { animation: none; }
+  .pr-body.is-hopping { animation: none; }
 }
 
 .lp-footer-links { display: flex; gap: 18px; }

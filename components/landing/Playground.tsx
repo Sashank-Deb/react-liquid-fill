@@ -11,7 +11,7 @@ type Mode = "hover" | "click";
 const DIRS: Exclude<LiquidDirection, { x: number; y: number }>[] = ["auto", "up", "down", "left", "right"];
 
 const SUBJECT_CODE: Record<Subject, { base: string; fill: string }> = {
-  logo: { base: '<img src="/python-outline.svg" alt="" />', fill: '<img src="/python.svg" alt="" />' },
+  logo: { base: '<img src="/angular-outline.svg" alt="" />', fill: '<img src="/angular.svg" alt="" />' },
   button: { base: '<span className="btn">Get started</span>', fill: '<span className="btn btn-inverted">Get started</span>' },
   text: { base: '<span className="outlined">Liquid</span>', fill: "<span>Liquid</span>" },
 };
@@ -94,8 +94,8 @@ export function Playground() {
           <span ref={stage} className="lp-stack lp-swap" key={subject}>
             {subject === "logo" && (
               <>
-                <img src={iconSrc("outline", "python")} alt="" width={128} height={128} />
-                <img src={iconSrc("filled", "python")} alt="" width={128} height={128} className="lp-ink" />
+                <img src={iconSrc("outline", "angular")} alt="" width={128} height={128} />
+                <img src={iconSrc("filled", "angular")} alt="" width={128} height={128} className="lp-ink" />
               </>
             )}
             {subject === "button" && (
