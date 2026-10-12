@@ -17,7 +17,7 @@ export function TechnologyIcon({ name, slug, darkInvert, size = 48, trigger = ["
   const isDuplicate = useIsMarqueeDuplicate(); // the marquee's second copy stays out of the tab order
   const focusable = !isDuplicate && ([] as string[]).concat(trigger).includes("focus");
   const art = (variant: "outline" | "filled") => (
-    <img src={iconSrc(variant, slug)} width={size} height={size} alt="" draggable={false} decoding="async" />
+    <img src={iconSrc(variant, slug)} width={size} height={size} alt="" draggable={false} decoding="async" loading="lazy" />
   );
 
   return (

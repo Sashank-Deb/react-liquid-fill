@@ -141,6 +141,14 @@ npm run icons        # rebuild the demo logos (Devicon originals → outline + f
 | `components/TechnologyIcon.tsx`, `TechnologyMarquee.tsx`, `Demos.tsx` | Demo components |
 | `scripts/build-icons.mjs`, `data/technologies.json`, `public/technology/` | Demo logo pipeline |
 
+## Deploying the site
+
+Set `NEXT_PUBLIC_SITE_URL` to your domain (e.g. `https://react-liquid-fill.dev`). Canonical URLs, the sitemap, `robots.txt`, social cards and structured data are all built from it.
+
+Both pages are **static**: rendered once at build time and served from the CDN, with no server work per visit. The only value that can change without a deploy is the published npm version, so each page is regenerated at most **once a day** (ISR, `revalidate = 86400`) and reads the latest version from the npm registry, falling back to `SITE.version` in `lib/site.ts`. A full redeploy isn't needed after `npm publish`.
+
+SEO files live in `app/`: `icon.svg` and `favicon.ico` (favicons), `apple-icon.tsx`, `manifest.ts`, `opengraph-image.tsx` (home) and `docs/opengraph-image.tsx` (docs), `sitemap.ts` and `robots.ts`. Images generated with `next/og` need `display: flex` on any `<div>` with more than one child.
+
 ## Publishing to npm
 
 The package lives in `packages/react-liquid-fill/` and builds from `lib/liquid/`, so the site and the package always share the same code. Publishing to npm also makes it installable with yarn and pnpm, which use the same registry.

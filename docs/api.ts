@@ -3,7 +3,6 @@
 export type PropRow = { name: string; type: string; default?: string; description: string };
 
 export const PACKAGE = "react-liquid-fill";
-export const VERSION = "0.1.0";
 
 export const liquidFillProps: PropRow[] = [
   { name: "base", type: "ReactNode", description: "Always visible. Usually the outline, monochrome or inactive version." },

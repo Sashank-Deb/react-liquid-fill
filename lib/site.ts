@@ -2,11 +2,17 @@
 
 export const SITE = {
   name: "react-liquid-fill",
+  /** ≤ 60 characters so search results show it in full */
   title: "react-liquid-fill: liquid hover and scroll effects for React",
+  /** ≤ 160 characters so search results don't cut it off */
   description:
-    "Pour colour into icons, buttons and text. A tiny React component and hook that reveals content with an animated liquid edge on hover, focus or scroll. Under 3 kB, zero dependencies.",
+    "Pour colour into icons, buttons and text. A tiny React component and hook for liquid fill effects on hover, focus or scroll. Under 3 kB, zero dependencies.",
   /** Set NEXT_PUBLIC_SITE_URL to your real domain before deploying. */
   url: process.env.NEXT_PUBLIC_SITE_URL ?? "https://react-liquid-fill.dev",
+  repo: "https://github.com/Sashank-Deb/react-liquid-fill",
+  npm: "https://www.npmjs.com/package/react-liquid-fill",
+  author: "Sashank Deb",
+  /** Fallback when the npm registry can't be reached at build time (see lib/npm.ts). */
   version: "0.1.0",
   sizeGzip: "2.7 kB",
   keywords: [

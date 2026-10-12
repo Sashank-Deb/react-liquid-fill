@@ -10,6 +10,7 @@
   --muted-icon: #c9c9c4;
   --accent: #1d6b80;
   --accent-soft: #e1eef1;
+  --on-accent: #ffffff;
   --font-sans: "Instrument Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
   --topbar: 56px;
@@ -26,6 +27,7 @@
     --muted-icon: #4a4a46;
     --accent: #6cc0d4;
     --accent-soft: #1b3036;
+    --on-accent: #10181a;
     color-scheme: dark;
   }
 }
@@ -40,6 +42,7 @@
   --muted-icon: #4a4a46;
   --accent: #6cc0d4;
   --accent-soft: #1b3036;
+  --on-accent: #10181a;
   color-scheme: dark;
 }
 
@@ -478,7 +481,9 @@ p code, li code { background: var(--code-bg); border: 1px solid var(--border); b
   flex: 1 1 auto; font: inherit; font-size: 13px; text-transform: capitalize; cursor: pointer;
   border: 0; border-radius: 7px; padding: 5px 8px; background: transparent; color: var(--secondary);
 }
-.lp-segmented button[aria-checked="true"] { background: var(--surface); color: var(--foreground); box-shadow: 0 1px 2px rgb(0 0 0 / 0.12); }
+.lp-segmented button:hover { color: var(--foreground); }
+/* Selected: accent fill with text in the page background colour, so it reads in both themes */
+.lp-segmented button[aria-checked="true"] { background: var(--accent); color: var(--on-accent); font-weight: 600; box-shadow: 0 1px 2px rgb(0 0 0 / 0.18); }
 .lp-segmented button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
 .lp-field input[type="range"] { width: 100%; accent-color: var(--accent); }
 
@@ -558,3 +563,86 @@ p code, li code { background: var(--code-bg); border: 1px solid var(--border); b
   .lp-tile-art img { width: 40px; height: 40px; }
   .lp-install code { font-size: 12.5px; }
 }
+
+/* ---------- Pixel runner (on top of the final call to action) ---------- */
+
+.lp-final { position: relative; }
+.pr-track {
+  position: absolute;
+  left: 28px;
+  right: 28px;
+  bottom: 100%;
+  height: 72px;
+  container-type: inline-size;
+  pointer-events: none;
+}
+.pr-mover {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 64px;
+  height: 72px;
+  pointer-events: auto;
+  animation: pr-run 16s linear infinite;
+}
+@keyframes pr-run {
+  0% { transform: translateX(0); }
+  49% { transform: translateX(calc(100cqw - 64px)); }
+  51% { transform: translateX(calc(100cqw - 64px)); }
+  100% { transform: translateX(0); }
+}
+/* Face the way it's running. Only the drawings are mirrored, not the button, so the liquid
+   still pours from the side the pointer actually comes from. Same duration as pr-run. */
+.pr-sprite { animation: pr-face 16s steps(1) infinite; }
+@keyframes pr-face {
+  0% { transform: scaleX(1); }
+  50% { transform: scaleX(-1); }
+}
+.pr-runner {
+  display: block;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--foreground); /* the sprite outline */
+  line-height: 0; /* no text baseline gap under the sprite, so its feet sit on the band */
+  cursor: pointer;
+  border-radius: 6px;
+  -webkit-tap-highlight-color: transparent;
+}
+.pr-runner:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+.pr-sprite { display: block; image-rendering: pixelated; transform-origin: center; }
+
+/* two-frame run cycle */
+.pr-frame-a { animation: pr-step-a 0.34s steps(1) infinite; }
+.pr-frame-b { animation: pr-step-b 0.34s steps(1) infinite; }
+@keyframes pr-step-a { 0% { opacity: 1; } 50% { opacity: 0; } }
+@keyframes pr-step-b { 0% { opacity: 0; } 50% { opacity: 1; } }
+
+/* stop to be coloured in: pause while a mouse is over it, or while it has keyboard focus */
+@media (hover: hover) {
+  .pr-mover:hover,
+  .pr-mover:hover .pr-sprite,
+  .pr-mover:hover .pr-frame { animation-play-state: paused; }
+}
+.pr-mover:focus-within,
+.pr-mover:focus-within .pr-sprite,
+.pr-mover:focus-within .pr-frame { animation-play-state: paused; }
+
+/* a little hop when the colour finishes pouring in */
+.pr-runner[data-filled] .pr-body { animation: pr-hop 0.42s cubic-bezier(0.3, 0.7, 0.4, 1) 1; }
+@keyframes pr-hop {
+  0%, 100% { transform: translateY(0); }
+  45% { transform: translateY(-14px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pr-mover { animation: none; left: 50%; margin-left: -32px; }
+  .pr-sprite { animation: none; }
+  .pr-frame-a { animation: none; opacity: 1; }
+  .pr-frame-b { animation: none; opacity: 0; }
+  .pr-runner[data-filled] .pr-body { animation: none; }
+}
+
+.lp-footer-links { display: flex; gap: 18px; }
+.lp-footer-links a { color: var(--secondary); text-decoration: none; }
+.lp-footer-links a:hover { color: var(--foreground); }

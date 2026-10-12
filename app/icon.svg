@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <style>
+    .ring { fill: #f7f7f4; stroke: #1c1c1a; }
+    .liquid { fill: #1d6b80; }
+    @media (prefers-color-scheme: dark) {
+      .ring { fill: #141413; stroke: #ededea; }
+      .liquid { fill: #6cc0d4; }
+    }
+  </style>
+  <defs>
+    <clipPath id="inside"><circle cx="32" cy="32" r="25" /></clipPath>
+  </defs>
+  <circle class="ring" cx="32" cy="32" r="27" stroke-width="5" />
+  <path class="liquid" clip-path="url(#inside)" d="M0 34 C 10 28, 20 28, 32 34 S 54 40, 64 34 V 64 H 0 Z" />
+</svg>
