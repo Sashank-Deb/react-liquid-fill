@@ -769,3 +769,7 @@ p code, li code { background: var(--code-bg); border: 1px solid var(--border); b
   .meadow-leaf { display: none; }
   .meadow-edge { transition: none; }
 }
+
+/* The fox can duck into the grass: its strip clips at the band's top edge (only below it),
+   so sinking down hides it behind the grass edge without cutting off hops above. */
+.pr-track { clip-path: inset(-200px -200px 0 -200px); }

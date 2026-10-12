@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useLiquidFill } from "@/lib/liquid";
-import { playStep, unlockAudio } from "./footsteps";
+import { playRustle, playStep, unlockAudio } from "./footsteps";
 
 /*
   A pixel fox on a 17×18 grid: tall ears with cream tufts, closed happy eyes, pink cheeks,
@@ -250,11 +250,13 @@ type PixelRunnerProps = {
   footsteps?: boolean;
 };
 
-/** A fox that wanders along the top edge of its positioned parent: walks, pauses, turns. */
+/** A fox that wanders along the top edge of its positioned parent: walks, pauses, turns,
+ *  and, while coloured, sometimes hides in the grass and pops up again. */
 export function PixelRunner({ onColourChange, footsteps = false }: PixelRunnerProps) {
   const art = useRef<HTMLSpanElement>(null);
   const moverRef = useRef<HTMLDivElement>(null);
   const [coloured, setColoured] = useState(false);
+  const colouredRef = useRef(false); // read by the wander loop: it only hides while coloured
 
   // Manual trigger: only clicks change the colour.
   const liquid = useLiquidFill<HTMLButtonElement>({
@@ -276,6 +278,7 @@ export function PixelRunner({ onColourChange, footsteps = false }: PixelRunnerPr
   const flip = (e: React.MouseEvent<HTMLButtonElement>) => {
     const next = liquid.getProgress() <= 0.5;
     setColoured(next);
+    colouredRef.current = next;
     if (next) {
       unlockAudio(); // inside the click, so the browser allows sound
       liquid.fill(e.detail > 0 ? e : "up"); // from the pointer, or rising for keyboard
@@ -313,29 +316,56 @@ export function PixelRunner({ onColourChange, footsteps = false }: PixelRunnerPr
     return () => cancelAnimationFrame(raf);
   }, [footsteps]);
 
-  // Wandering. Math.random picks the decisions (how far, which way, how fast, whether to rest);
-  // the motion between them is smooth, so it reads as natural rather than jittery.
+  // Wandering. Math.random picks the decisions (how far, which way, how fast, whether to rest,
+  // and, while the meadow is showing, whether to hide in the grass); the motion between them is
+  // eased, so it reads as natural rather than jittery.
   useEffect(() => {
     const mover = moverRef.current;
     const track = mover?.parentElement;
     if (!mover || !track) return;
     const rnd = (a: number, b: number) => a + Math.random() * (b - a);
     const room = () => Math.max(0, track.clientWidth - mover.offsetWidth);
-    let x = room() * rnd(0.1, 0.35);
+    const pos = { x: room() * rnd(0.1, 0.35), dy: 0 }; // dy > 0 = sunk into the grass
     let facing = 1;
+    let alive = true;
     let raf = 0;
     let timer: ReturnType<typeof setTimeout> | undefined;
+
     const place = () => {
-      mover.style.transform = `translate3d(${x.toFixed(1)}px, 0, 0)`;
+      mover.style.transform = `translate3d(${pos.x.toFixed(1)}px, ${pos.dy.toFixed(1)}px, 0)`;
     };
     const setWalking = (walking: boolean) => mover.classList.toggle("is-idle", !walking);
+    const face = (dir: number) => {
+      facing = dir;
+      mover.classList.toggle("is-left", dir < 0);
+    };
 
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      x = room() / 2;
+      pos.x = room() / 2;
       place();
       setWalking(false);
       return;
     }
+
+    const sleep = (ms: number) => new Promise<void>((done) => (timer = setTimeout(done, ms)));
+    const easeInOut = (k: number) => 0.5 - 0.5 * Math.cos(Math.PI * k);
+    const easeIn = (k: number) => k * k;
+    const easeOut = (k: number) => 1 - (1 - k) * (1 - k);
+    const easeOutBack = (k: number) => 1 + 2.2 * Math.pow(k - 1, 3) + 1.2 * Math.pow(k - 1, 2); // small overshoot
+    const tween = (key: "x" | "dy", to: number, ms: number, ease: (k: number) => number) =>
+      new Promise<void>((done) => {
+        const from = pos[key];
+        const start = performance.now();
+        const tick = (now: number) => {
+          if (!alive) return;
+          const k = Math.min(1, (now - start) / ms);
+          pos[key] = from + (to - from) * ease(k);
+          place();
+          if (k < 1) raf = requestAnimationFrame(tick);
+          else done();
+        };
+        raf = requestAnimationFrame(tick);
+      });
 
     const BASE_SPEED = 62; // px/s that matches the 0.88s walk cycle without paws sliding
     const BASE_CYCLE = 0.88;
@@ -344,48 +374,68 @@ export function PixelRunner({ onColourChange, footsteps = false }: PixelRunnerPr
       const w = room();
       let dir = Math.random() < 0.61 ? facing : -facing; // usually keep going the same way (39% turn)
       const dist = rnd(70, 420);
-      if (x + dir * dist < 0 || x + dir * dist > w) dir = -dir; // turn back at the edges
-      return Math.max(0, Math.min(w, x + dir * dist));
+      if (pos.x + dir * dist < 0 || pos.x + dir * dist > w) dir = -dir; // turn back at the edges
+      return Math.max(0, Math.min(w, pos.x + dir * dist));
     };
 
-    const rest = () => {
-      setWalking(false);
-      timer = setTimeout(() => walkTo(pickTarget()), rnd(760, 2840));
-    };
-
-    const walkTo = (target: number) => {
-      const from = x;
-      const dist = Math.abs(target - from);
-      if (dist < 8) return rest();
-      facing = target > from ? 1 : -1;
-      mover.classList.toggle("is-left", facing < 0);
+    const walkTo = async (target: number) => {
+      const dist = Math.abs(target - pos.x);
+      if (dist < 8) return;
+      face(target > pos.x ? 1 : -1);
       const speed = rnd(49, 75);
       // steps keep pace with the speed, so the paws don't slide
       mover.style.setProperty("--pr-step", `${((BASE_CYCLE * BASE_SPEED) / speed).toFixed(3)}s`);
       setWalking(true);
-      const duration = (dist / speed) * 1000 + 350; // a little extra for easing in and out
-      const start = performance.now();
-      const tick = (now: number) => {
-        const k = Math.min(1, (now - start) / duration);
-        x = from + (target - from) * (0.5 - 0.5 * Math.cos(Math.PI * k)); // ease in-out
-        place();
-        if (k < 1) raf = requestAnimationFrame(tick);
-        else if (Math.random() < 0.66) rest(); // pauses after ~2 in 3 walks
-        else walkTo(pickTarget());
-      };
-      raf = requestAnimationFrame(tick);
+      await tween("x", target, (dist / speed) * 1000 + 350, easeInOut);
+      setWalking(false);
     };
 
-    place();
-    setWalking(false);
-    timer = setTimeout(() => walkTo(pickTarget()), rnd(300, 900));
+    // Duck into the grass, wait, then come back up: same spot, or somewhere new
+    const hide = async () => {
+      const depth = mover.offsetHeight + 6;
+      playRustle();
+      await tween("dy", depth, 300, easeIn);
+      await sleep(rnd(1200, 3200));
+      if (!alive) return;
+      if (Math.random() < 0.55) {
+        const w = room();
+        let x = rnd(0, w);
+        if (Math.abs(x - pos.x) < 80) x = (x + w / 2) % w; // make a move count
+        pos.x = x;
+        if (Math.random() < 0.5) face(-facing);
+        place();
+      }
+      if (Math.random() < 0.5) {
+        await tween("dy", depth * 0.36, 280, easeOut); // peek: ears and eyes over the grass
+        await sleep(rnd(400, 900));
+      }
+      playRustle(0.8);
+      await tween("dy", 0, 340, easeOutBack);
+    };
+
+    const run = async () => {
+      place();
+      setWalking(false);
+      await sleep(rnd(300, 900));
+      while (alive) {
+        await walkTo(pickTarget());
+        if (!alive) break;
+        if (Math.random() < 0.66) {
+          // pause after ~2 in 3 walks; while the meadow shows, half the pauses are spent hiding
+          if (colouredRef.current && Math.random() < 0.5) await hide();
+          else await sleep(rnd(760, 2840));
+        }
+      }
+    };
+    void run();
 
     const ro = new ResizeObserver(() => {
-      x = Math.min(x, room());
+      pos.x = Math.min(pos.x, room());
       place();
     });
     ro.observe(track);
     return () => {
+      alive = false;
       cancelAnimationFrame(raf);
       clearTimeout(timer);
       ro.disconnect();

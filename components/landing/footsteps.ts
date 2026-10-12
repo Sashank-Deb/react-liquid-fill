@@ -169,3 +169,22 @@ export function stopAmbience(): void {
   ambience.forEach(clearTimeout);
   ambience = [];
 }
+
+/** A soft swish of grass, for the fox ducking into the meadow or popping back out. */
+export function playRustle(volume = 1): void {
+  if (!ready()) return;
+  const t = ctx!.currentTime + 0.01;
+  const src = ctx!.createBufferSource();
+  src.buffer = noise;
+  const bp = ctx!.createBiquadFilter();
+  bp.type = "bandpass";
+  bp.frequency.setValueAtTime(rand(1800, 2400), t);
+  bp.frequency.linearRampToValueAtTime(rand(3200, 4200), t + 0.22);
+  bp.Q.value = 0.8;
+  const g = ctx!.createGain();
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.exponentialRampToValueAtTime(0.018 * volume, t + 0.08);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + 0.3);
+  src.connect(bp).connect(g).connect(out!);
+  src.start(t, rand(0, 0.15), 0.32);
+}
