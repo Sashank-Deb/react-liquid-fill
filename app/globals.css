@@ -723,8 +723,8 @@ p code, li code { background: var(--code-bg); border: 1px solid var(--border); b
 /* grass blades on the top edge, in front of the fox's paws */
 .meadow-edge {
   position: absolute;
-  left: 22px;
-  right: 22px;
+  left: 0;
+  width: 100%; /* exactly the box: no wider, no narrower */
   bottom: calc(100% - 4px);
   z-index: 3;
   display: block;
@@ -733,6 +733,9 @@ p code, li code { background: var(--code-bg); border: 1px solid var(--border); b
   pointer-events: none;
 }
 .lp-final[data-scene] .meadow-edge { opacity: 1; }
+/* with grass along the whole top edge, the top corners square off like a pixel-art platform */
+.lp-final { transition: border-radius 0.35s ease; }
+.lp-final[data-scene] { border-top-left-radius: 4px; border-top-right-radius: 4px; }
 
 /* light text with a pixel drop shadow while the meadow is showing */
 .lp-final[data-scene] > h2,
@@ -765,24 +768,6 @@ p code, li code { background: var(--code-bg); border: 1px solid var(--border); b
   75% { transform: translate(12px, 75cqh) rotate(18deg); }
   100% { transform: translate(0, calc(100cqh + 28px)) rotate(0deg); }
 }
-
-/* footsteps on/off */
-.meadow-sound {
-  position: absolute;
-  top: 14px;
-  right: 16px;
-  z-index: 2;
-  font: 500 12px/1 var(--font-mono);
-  color: #fbf6e9;
-  background: rgb(18 40 20 / 0.35);
-  border: 2px solid currentColor;
-  border-radius: 0;
-  padding: 6px 10px;
-  cursor: pointer;
-  animation: lp-swap-in 0.3s ease both;
-}
-.meadow-sound[aria-pressed="false"] { opacity: 0.7; }
-.meadow-sound:focus-visible { outline: 2px solid #fbf6e9; outline-offset: 2px; }
 
 @media (prefers-reduced-motion: reduce) {
   .meadow-leaf { display: none; }

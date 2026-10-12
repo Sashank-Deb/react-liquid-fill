@@ -1,8 +1,7 @@
 /*
   A pixel-art meadow for the "Ready to pour?" band, at the same 4px pixel scale as the fox.
   The ground texture is generated from a fixed seed, so it looks hand-scattered but renders
-  identically on the server and in the browser: grass tufts, fallen leaves, little flowers
-  and pebbles. A strip of grass blades sits on the band's top edge (where the fox walks),
+  identically on the server and in the browser: grass tufts, fallen leaves and pebbles. A strip of grass blades sits on the band's top edge (where the fox walks),
   and a few leaves drift down.
 */
 
@@ -17,9 +16,6 @@ const C = {
   leafRed: "#c4462a",
   leafAmber: "#e5b23a",
   stem: "#6b4423",
-  petal: "#f8f4ea",
-  petalPink: "#f2a6b4",
-  centre: "#f2c94c",
   pebble: "#8f8f86",
   pebbleShade: "#6e6e66",
 };
@@ -31,7 +27,6 @@ const LEAVES = [
   [".x.", "xxx", "xx.", "..s"],
   ["xx", "xx", "s."],
 ];
-const FLOWER = [".p.", "pcp", ".p."];
 const TUFTS = [
   ["g", "g"],
   ["g.g", ".g."],
@@ -68,10 +63,9 @@ function buildTile(): Px[] {
     const t = TUFTS[at(TUFTS.length)];
     stamp(px, t, at(TILE_W), at(TILE_H), { g: r() < 0.6 ? C.tuftLight : C.tuftDark, d: C.tuftDark });
   }
-  for (let i = 0; i < 8; i++) stamp(px, ["pp", "pp"], at(TILE_W), at(TILE_H), { p: r() < 0.5 ? C.pebble : C.pebbleShade });
-  for (let i = 0; i < 10; i++) stamp(px, FLOWER, at(TILE_W), at(TILE_H), { p: r() < 0.6 ? C.petal : C.petalPink, c: C.centre });
+  for (let i = 0; i < 5; i++) stamp(px, ["pp", "pp"], at(TILE_W), at(TILE_H), { p: r() < 0.5 ? C.pebble : C.pebbleShade });
   const leafColours = [C.leafOrange, C.leafRed, C.leafAmber];
-  for (let i = 0; i < 22; i++) {
+  for (let i = 0; i < 13; i++) {
     stamp(px, LEAVES[at(LEAVES.length)], at(TILE_W), at(TILE_H), { x: leafColours[at(3)], s: C.stem });
   }
   return px;
@@ -117,7 +111,7 @@ export function MeadowGround() {
 /** Grass blades poking up above the band's top edge, where the fox walks. */
 export function MeadowEdge() {
   return (
-    <svg className="meadow-edge" width="100%" height={EDGE.length * PX} aria-hidden="true" shapeRendering="crispEdges">
+    <svg className="meadow-edge" height={EDGE.length * PX} aria-hidden="true" shapeRendering="crispEdges">
       <defs>
         <pattern id="meadow-edge" width={EDGE[0].length * PX} height={EDGE.length * PX} patternUnits="userSpaceOnUse">
           <Pixels pixels={edgePixels} />
