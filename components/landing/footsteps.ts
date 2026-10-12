@@ -68,7 +68,7 @@ export function playStep(volume = 1, at?: number): void {
   const n = 4 + Math.floor(Math.random() * 3); // 4–6 crackles, 10–28ms apart, fading
   let offset = 0;
   for (let i = 0; i < n; i++) {
-    crackle(t + offset, rand(0.34, 0.6) * volume * Math.max(0.35, 1 - i * 0.14));
+    crackle(t + offset, rand(0.2, 0.36) * volume * Math.max(0.35, 1 - i * 0.14)); // 40% less crunch
     offset += rand(0.01, 0.028);
   }
 

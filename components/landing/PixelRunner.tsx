@@ -342,15 +342,15 @@ export function PixelRunner({ onColourChange, footsteps = false }: PixelRunnerPr
 
     const pickTarget = () => {
       const w = room();
-      let dir = Math.random() < 0.7 ? facing : -facing; // usually keep going the same way
-      const dist = rnd(110, 380);
+      let dir = Math.random() < 0.61 ? facing : -facing; // usually keep going the same way (39% turn)
+      const dist = rnd(70, 420);
       if (x + dir * dist < 0 || x + dir * dist > w) dir = -dir; // turn back at the edges
       return Math.max(0, Math.min(w, x + dir * dist));
     };
 
     const rest = () => {
       setWalking(false);
-      timer = setTimeout(() => walkTo(pickTarget()), rnd(1000, 2600));
+      timer = setTimeout(() => walkTo(pickTarget()), rnd(760, 2840));
     };
 
     const walkTo = (target: number) => {
@@ -359,7 +359,7 @@ export function PixelRunner({ onColourChange, footsteps = false }: PixelRunnerPr
       if (dist < 8) return rest();
       facing = target > from ? 1 : -1;
       mover.classList.toggle("is-left", facing < 0);
-      const speed = rnd(52, 72);
+      const speed = rnd(49, 75);
       // steps keep pace with the speed, so the paws don't slide
       mover.style.setProperty("--pr-step", `${((BASE_CYCLE * BASE_SPEED) / speed).toFixed(3)}s`);
       setWalking(true);
@@ -370,7 +370,7 @@ export function PixelRunner({ onColourChange, footsteps = false }: PixelRunnerPr
         x = from + (target - from) * (0.5 - 0.5 * Math.cos(Math.PI * k)); // ease in-out
         place();
         if (k < 1) raf = requestAnimationFrame(tick);
-        else if (Math.random() < 0.55) rest();
+        else if (Math.random() < 0.66) rest(); // pauses after ~2 in 3 walks
         else walkTo(pickTarget());
       };
       raf = requestAnimationFrame(tick);
