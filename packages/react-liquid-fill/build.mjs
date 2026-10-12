@@ -9,12 +9,25 @@
  * Both bundles start with "use client" so they work in Next.js server components' trees.
  */
 import { execFileSync } from "node:child_process";
+import { existsSync } from "node:fs";
 import { mkdir, readFile, readdir, rm, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { build } from "esbuild";
 
 const here = dirname(fileURLToPath(import.meta.url));
+
+// The build tools are devDependencies of this folder, not of the repository root.
+const missing = ["esbuild", "typescript", "@types/react"].filter((p) => !existsSync(join(here, "node_modules", p)));
+if (missing.length) {
+  console.error(
+    `\nMissing build tools: ${missing.join(", ")}.\n` +
+      `Run "npm install" inside packages/react-liquid-fill (not the repository root), then try again:\n\n` +
+      `  cd ${here}\n  npm install\n`,
+  );
+  process.exit(1);
+}
+
+const { build } = await import("esbuild");
 const dist = join(here, "dist");
 const entry = join(here, "../../lib/liquid/index.ts");
 
