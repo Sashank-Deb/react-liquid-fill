@@ -4,36 +4,105 @@ import { useRef, useState } from "react";
 import { useLiquidFill } from "@/lib/liquid";
 
 /*
-  A sitting pixel fox on a 17×17 grid: tall ears with cream tufts, closed happy eyes,
-  pink cheeks, white chest and a big curled tail. It never stops hopping along the band (CSS).
+  A pixel fox on a 17×18 grid: tall ears with cream tufts, closed happy eyes, pink cheeks,
+  white chest and a big curled tail. Four frames make a walk cycle (each paw lifts in turn and
+  the body rises a pixel between steps); CSS steps through them and adds a matching lean, and the
+  fox never stops walking along the band.
   The greyscale copy is the base; the colour copy is poured in by useLiquidFill:
     - hover: pours in from the side the pointer comes from, drains when it leaves
     - click / tap / Enter: keeps the colour after the pointer leaves; click again to let it drain
 
   Key: K outline · O fur · o fur shade · W white · w cream · P cheek · E eye / nose / paws · . empty
 */
-const FOX = [
-  ".....K.........K.",
-  "....KoK.......KoK",
-  "....KwoK.....KowK",
-  "....KWoOKKKKKOoWK",
-  "....KWOOOOOOOOOWK",
-  "....KOOOOOOOOOOOK",
-  ".K..KOOOOOOOOOOOK",
-  "KWK.KOOOOOOOOOOOK",
-  "KWWKKWWEEOOOEEWWK",
-  "KWWWKWPPWWOWWPPWK",
-  "KWWWKWWWWWEWWWWWK",
-  "KWWOOKWWWWWWWWWK.",
-  ".KOOOOKKoWWWOKK..",
-  ".KoOOOoKOWWWwK...",
-  "..KooooKoWWWOK...",
-  "...KKooKoEWEoK...",
-  ".....KKKKEKEKK...",
+const FRAMES = [
+  // left paw lifted, body low
+  [
+    ".................",
+    ".....K.........K.",
+    "....KoK.......KoK",
+    "....KwoK.....KowK",
+    "....KWoOKKKKKOoWK",
+    "....KWOOOOOOOOOWK",
+    "....KOOOOOOOOOOOK",
+    ".K..KOOOOOOOOOOOK",
+    "KWK.KOOOOOOOOOOOK",
+    "KWWKKWWEEOOOEEWWK",
+    "KWWWKWPPWWOWWPPWK",
+    "KWWWKWWWWWEWWWWWK",
+    "KWWOOKWWWWWWWWWK.",
+    ".KOOOOKKoWWWOKK..",
+    ".KoOOOoKOWWWwK...",
+    "..KooooKoEWWOK...",
+    "...KKooKoEWEoK...",
+    ".....KKKK.KEKK...",
+  ],
+  // passing, body high
+  [
+    ".....K.........K.",
+    "....KoK.......KoK",
+    "....KwoK.....KowK",
+    "....KWoOKKKKKOoWK",
+    "....KWOOOOOOOOOWK",
+    "....KOOOOOOOOOOOK",
+    ".K..KOOOOOOOOOOOK",
+    "KWK.KOOOOOOOOOOOK",
+    "KWWKKWWEEOOOEEWWK",
+    "KWWWKWPPWWOWWPPWK",
+    "KWWWKWWWWWEWWWWWK",
+    "KWWOOKWWWWWWWWWK.",
+    ".KOOOOKKoWWWOKK..",
+    ".KoOOOoKOWWWwK...",
+    "..KooooKoWWWOK...",
+    "..KooooKoWWWOK...",
+    "...KKooKoEWEoK...",
+    ".....KKKKEKEKK...",
+  ],
+  // right paw lifted, body low
+  [
+    ".................",
+    ".....K.........K.",
+    "....KoK.......KoK",
+    "....KwoK.....KowK",
+    "....KWoOKKKKKOoWK",
+    "....KWOOOOOOOOOWK",
+    "....KOOOOOOOOOOOK",
+    ".K..KOOOOOOOOOOOK",
+    "KWK.KOOOOOOOOOOOK",
+    "KWWKKWWEEOOOEEWWK",
+    "KWWWKWPPWWOWWPPWK",
+    "KWWWKWWWWWEWWWWWK",
+    "KWWOOKWWWWWWWWWK.",
+    ".KOOOOKKoWWWOKK..",
+    ".KoOOOoKOWWWwK...",
+    "..KooooKoWWEOK...",
+    "...KKooKoEWEoK...",
+    ".....KKKKEK.KK...",
+  ],
+  // passing, body high
+  [
+    ".....K.........K.",
+    "....KoK.......KoK",
+    "....KwoK.....KowK",
+    "....KWoOKKKKKOoWK",
+    "....KWOOOOOOOOOWK",
+    "....KOOOOOOOOOOOK",
+    ".K..KOOOOOOOOOOOK",
+    "KWK.KOOOOOOOOOOOK",
+    "KWWKKWWEEOOOEEWWK",
+    "KWWWKWPPWWOWWPPWK",
+    "KWWWKWWWWWEWWWWWK",
+    "KWWOOKWWWWWWWWWK.",
+    ".KOOOOKKoWWWOKK..",
+    ".KoOOOoKOWWWwK...",
+    "..KooooKoWWWOK...",
+    "..KooooKoWWWOK...",
+    "...KKooKoEWEoK...",
+    ".....KKKKEKEKK...",
+  ],
 ];
 
 const W = 17;
-const H = 17;
+const H = 18;
 
 type Palette = Record<string, string>;
 
@@ -79,12 +148,16 @@ function Rects({ rows, palette }: { rows: string[]; palette: Palette }) {
 function Sprite({ palette }: { palette: Palette }) {
   return (
     <svg className="pr-sprite" viewBox={`0 0 ${W} ${H}`} width={W * 4} height={H * 4} shapeRendering="crispEdges" aria-hidden="true">
-      <Rects rows={FOX} palette={palette} />
+      {FRAMES.map((rows, i) => (
+        <g key={i} className={`pr-f pr-f${i + 1}`}>
+          <Rects rows={rows} palette={palette} />
+        </g>
+      ))}
     </svg>
   );
 }
 
-/** A fox that hops back and forth along the top edge of its positioned parent. */
+/** A fox that walks back and forth along the top edge of its positioned parent. */
 export function PixelRunner() {
   const art = useRef<HTMLSpanElement>(null);
   const hovering = useRef(false);

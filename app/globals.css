@@ -601,8 +601,9 @@ p code, li code { background: var(--code-bg); border: 1px solid var(--border); b
 
 .lp-final {
   position: relative;
-  --pr-w: 68px; /* sprite: 17×17 pixels at 4× */
-  --pr-h: 68px;
+  --pr-w: 68px; /* sprite: 17×18 pixels at 4× */
+  --pr-h: 72px;
+  --pr-step: 0.56s; /* one full walk cycle: four frames */
 }
 .pr-track {
   position: absolute;
@@ -649,13 +650,25 @@ p code, li code { background: var(--code-bg); border: 1px solid var(--border); b
 .pr-runner:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
 .pr-sprite { display: block; image-rendering: pixelated; transform-origin: center; }
 
-/* hop along: up, then a little squash on landing */
-.pr-runner { animation: pr-bounce 0.46s cubic-bezier(0.33, 0, 0.67, 1) infinite; transform-origin: 50% 100%; }
-@keyframes pr-bounce {
-  0%, 100% { transform: translateY(0) scale(1.06, 0.93); }
-  12% { transform: translateY(-2px) scale(1, 1); }
-  50% { transform: translateY(-11px) scale(0.98, 1.03); }
-  88% { transform: translateY(-2px) scale(1, 1); }
+/* Walk cycle: show one of four frames at a time, in order. Every frame runs the same
+   keyframes (visible for the first quarter), offset by a quarter cycle each. */
+.pr-f { opacity: 0; animation: pr-frame var(--pr-step) steps(1, end) infinite; }
+.pr-f1 { animation-delay: 0s; }
+.pr-f2 { animation-delay: calc(var(--pr-step) * -0.75); }
+.pr-f3 { animation-delay: calc(var(--pr-step) * -0.5); }
+.pr-f4 { animation-delay: calc(var(--pr-step) * -0.25); }
+@keyframes pr-frame {
+  0% { opacity: 1; }
+  25%, 100% { opacity: 0; }
+}
+
+/* lean into each step, in time with the frames */
+.pr-runner { animation: pr-lean var(--pr-step) steps(1, end) infinite; transform-origin: 50% 100%; }
+@keyframes pr-lean {
+  0% { transform: rotate(-3deg); }
+  25% { transform: rotate(0deg); }
+  50% { transform: rotate(3deg); }
+  75% { transform: rotate(0deg); }
 }
 
 /* the two copies of the sprite, stacked; the colour copy is clipped by --liquid-clip */
@@ -674,6 +687,8 @@ p code, li code { background: var(--code-bg); border: 1px solid var(--border); b
   .pr-mover { animation: none; left: 50%; margin-left: calc(var(--pr-w) / -2); }
   .pr-sprite { animation: none; }
   .pr-runner { animation: none; }
+  .pr-f { animation: none; }
+  .pr-f1 { opacity: 1; }
   .pr-runner[data-filled] .pr-body { animation: none; }
 }
 
