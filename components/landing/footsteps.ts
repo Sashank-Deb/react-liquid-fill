@@ -1,12 +1,10 @@
 "use client";
 
 /**
- * Synthesized footsteps through dry leaves (Web Audio, no audio files).
- *
- * A real leaf crunch is not one sound but a quick run of tiny crackles, so each step is
- * 6–9 very short, bright noise snaps 8–24ms apart (each with its own pitch and level),
- * a faint papery rustle under them, and a light thump for the paw. Browsers only allow sound
- * after the visitor interacts, so call unlockAudio() from a click handler before playStep().
+ * The meadow's sounds, synthesized with Web Audio (no audio files):
+ *   - playStep(): a paw on dry leaves: a short run of soft crackles, a papery rustle, a light thump
+ *   - startAmbience() / stopAmbience(): very quiet birds now and then, and two crickets
+ * Browsers only allow sound after the visitor interacts, so call unlockAudio() from a click first.
  */
 
 let ctx: AudioContext | null = null;
@@ -27,7 +25,7 @@ export function unlockAudio(): void {
       for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
     }
     if (!out) {
-      // gentle limiter so overlapping crackles never clip
+      // gentle limiter so overlapping sounds never clip
       const comp = ctx.createDynamicsCompressor();
       comp.threshold.value = -14;
       comp.ratio.value = 6;
@@ -36,70 +34,134 @@ export function unlockAudio(): void {
       out.connect(comp).connect(ctx.destination);
     }
   } catch {
-    ctx = null; // audio unavailable; footsteps simply stay silent
+    ctx = null; // audio unavailable; the meadow simply stays silent
   }
 }
 
+const ready = () => !!ctx && !!noise && !!out && ctx.state === "running";
 const rand = (a: number, b: number) => a + Math.random() * (b - a);
 
-/** One crackle: a few milliseconds of high, band-passed noise with a sharp attack. */
+/* ---------------- footsteps ---------------- */
+
+/** One crackle: a few milliseconds of band-passed noise with a quick attack. */
 function crackle(at: number, level: number) {
-  if (!ctx || !noise || !out) return;
-  const src = ctx.createBufferSource();
+  const src = ctx!.createBufferSource();
   src.buffer = noise;
-  const hp = ctx.createBiquadFilter();
-  hp.type = "highpass";
-  hp.frequency.value = rand(1800, 2600);
-  const bp = ctx.createBiquadFilter();
+  const bp = ctx!.createBiquadFilter();
   bp.type = "bandpass";
-  bp.frequency.value = rand(2800, 6500);
-  bp.Q.value = rand(0.8, 1.6);
-  const g = ctx.createGain();
-  const len = rand(0.004, 0.016);
+  bp.frequency.value = rand(2200, 4800); // a little lower and wider than a sharp snap
+  bp.Q.value = rand(0.7, 1.2);
+  const g = ctx!.createGain();
+  const len = rand(0.006, 0.018);
   g.gain.setValueAtTime(0.0001, at);
-  g.gain.exponentialRampToValueAtTime(level, at + 0.0015);
+  g.gain.exponentialRampToValueAtTime(level, at + 0.002);
   g.gain.exponentialRampToValueAtTime(0.0001, at + len);
-  src.connect(hp).connect(bp).connect(g).connect(out);
+  src.connect(bp).connect(g).connect(out!);
   src.start(at, rand(0, 0.45), len + 0.01);
 }
 
-export function playStep(volume = 1): void {
-  if (!ctx || !noise || !out || ctx.state !== "running") return;
-  const t = ctx.currentTime + 0.005;
+/** A paw on dry leaves. Middle ground: a few soft crackles over a papery rustle. */
+export function playStep(volume = 1, at?: number): void {
+  if (!ready()) return;
+  const t = at ?? ctx!.currentTime + 0.005;
 
-  // the crunch: a cluster of crackles, front-loaded like weight settling onto leaves
-  // (leaves break one after another, so each crackle follows the last by 8–24ms, getting quieter)
-  const n = 6 + Math.floor(Math.random() * 4);
+  const n = 4 + Math.floor(Math.random() * 3); // 4–6 crackles, 10–28ms apart, fading
   let offset = 0;
   for (let i = 0; i < n; i++) {
-    crackle(t + offset, rand(0.7, 1.4) * volume * Math.max(0.35, 1 - i * 0.09));
-    offset += rand(0.008, 0.024);
+    crackle(t + offset, rand(0.34, 0.6) * volume * Math.max(0.35, 1 - i * 0.14));
+    offset += rand(0.01, 0.028);
   }
 
-  // a faint papery rustle underneath
-  const rustle = ctx.createBufferSource();
+  const rustle = ctx!.createBufferSource();
   rustle.buffer = noise;
-  const rf = ctx.createBiquadFilter();
+  const rf = ctx!.createBiquadFilter();
   rf.type = "bandpass";
-  rf.frequency.value = rand(3500, 5000);
-  rf.Q.value = 0.7;
-  const rg = ctx.createGain();
+  rf.frequency.value = rand(2600, 4000);
+  rf.Q.value = 0.6;
+  const rg = ctx!.createGain();
   rg.gain.setValueAtTime(0.0001, t);
-  rg.gain.exponentialRampToValueAtTime(0.08 * volume, t + 0.01);
-  rg.gain.exponentialRampToValueAtTime(0.0001, t + 0.14);
-  rustle.connect(rf).connect(rg).connect(out);
-  rustle.start(t, rand(0, 0.3), 0.16);
+  rg.gain.exponentialRampToValueAtTime(0.05 * volume, t + 0.012);
+  rg.gain.exponentialRampToValueAtTime(0.0001, t + 0.13);
+  rustle.connect(rf).connect(rg).connect(out!);
+  rustle.start(t, rand(0, 0.3), 0.15);
 
-  // a light thump for the paw
-  const osc = ctx.createOscillator();
+  const osc = ctx!.createOscillator();
   osc.type = "sine";
   osc.frequency.setValueAtTime(120, t);
   osc.frequency.exponentialRampToValueAtTime(55, t + 0.06);
-  const thump = ctx.createGain();
+  const thump = ctx!.createGain();
   thump.gain.setValueAtTime(0.0001, t);
-  thump.gain.exponentialRampToValueAtTime(0.05 * volume, t + 0.005);
+  thump.gain.exponentialRampToValueAtTime(0.06 * volume, t + 0.005);
   thump.gain.exponentialRampToValueAtTime(0.0001, t + 0.07);
-  osc.connect(thump).connect(out);
+  osc.connect(thump).connect(out!);
   osc.start(t);
   osc.stop(t + 0.08);
+}
+
+/* ---------------- ambience (very quiet) ---------------- */
+
+function tone(at: number, f0: number, f1: number, dur: number, level: number, pan: number) {
+  const osc = ctx!.createOscillator();
+  osc.type = "sine";
+  osc.frequency.setValueAtTime(f0, at);
+  osc.frequency.exponentialRampToValueAtTime(f1, at + dur * 0.6);
+  osc.frequency.exponentialRampToValueAtTime(f0 * 0.92, at + dur);
+  const g = ctx!.createGain();
+  g.gain.setValueAtTime(0.0001, at);
+  g.gain.exponentialRampToValueAtTime(level, at + Math.min(0.01, dur / 4));
+  g.gain.exponentialRampToValueAtTime(0.0001, at + dur);
+  const p = ctx!.createStereoPanner();
+  p.pan.value = pan;
+  osc.connect(g).connect(p).connect(out!);
+  osc.start(at);
+  osc.stop(at + dur + 0.02);
+}
+
+/** A small songbird: 2–4 quick rising chirps, somewhere off to one side. */
+export function birdCall(at?: number): void {
+  if (!ready()) return;
+  let t = at ?? ctx!.currentTime + 0.05;
+  const base = rand(2600, 3600);
+  const pan = rand(-0.7, 0.7);
+  const n = 2 + Math.floor(Math.random() * 3);
+  for (let i = 0; i < n; i++) {
+    const d = rand(0.05, 0.09);
+    tone(t, base * rand(0.95, 1.05), base * rand(1.25, 1.5), d, rand(0.012, 0.02), pan);
+    t += d + rand(0.03, 0.07);
+  }
+}
+
+/** A cricket: 3–4 tiny pulses of a steady high tone. */
+export function cricketTrill(at?: number, freq = 4500, pan = 0): void {
+  if (!ready()) return;
+  let t = at ?? ctx!.currentTime + 0.02;
+  const n = 3 + Math.floor(Math.random() * 2);
+  for (let i = 0; i < n; i++) {
+    tone(t, freq, freq * 1.01, 0.016, 0.014, pan);
+    t += 0.045;
+  }
+}
+
+let ambience: ReturnType<typeof setTimeout>[] = [];
+
+export function startAmbience(): void {
+  stopAmbience();
+  if (!ready()) return;
+  const loop = (fn: () => void, min: number, max: number, first: number) => {
+    const run = () => {
+      if (!document.hidden) fn();
+      ambience.push(setTimeout(run, rand(min, max)));
+    };
+    ambience.push(setTimeout(run, first));
+  };
+  loop(() => birdCall(), 4000, 11000, rand(1500, 3500));
+  const c1 = { f: rand(4300, 4600), pan: rand(-0.6, -0.2) };
+  const c2 = { f: rand(4700, 5000), pan: rand(0.2, 0.6) };
+  loop(() => cricketTrill(undefined, c1.f, c1.pan), 900, 1400, 600);
+  loop(() => cricketTrill(undefined, c2.f, c2.pan), 1100, 1800, 1300);
+}
+
+export function stopAmbience(): void {
+  ambience.forEach(clearTimeout);
+  ambience = [];
 }

@@ -4,10 +4,12 @@ import { useEffect, useState } from "react";
 import { useLiquidFill } from "@/lib/liquid";
 import { PixelRunner } from "./PixelRunner";
 import { FallingLeaves, MeadowEdge, MeadowGround } from "./Meadow";
+import { startAmbience, stopAmbience } from "./footsteps";
 
 /**
  * The closing call to action. Clicking the fox colours it in and pours a pixel meadow into the
- * band from where the fox is standing (with footsteps); clicking again drains it all away.
+ * band from where the fox is standing, with footsteps and faint birds and crickets; clicking
+ * again drains it all away.
  */
 export function FinalCta({ docsHref }: { docsHref: string }) {
   const [scene, setScene] = useState(false);
@@ -26,6 +28,13 @@ export function FinalCta({ docsHref }: { docsHref: string }) {
     mq.addEventListener("change", onChange);
     return () => mq.removeEventListener("change", onChange);
   }, []);
+
+  // Very quiet birds and crickets while the meadow is showing
+  useEffect(() => {
+    if (!scene || reduced) return;
+    startAmbience();
+    return () => stopAmbience();
+  }, [scene, reduced]);
 
   return (
     <section ref={meadow.ref} className="lp-final" data-scene={scene || undefined} aria-labelledby="final-title">

@@ -250,9 +250,10 @@ type PixelRunnerProps = {
   footsteps?: boolean;
 };
 
-/** A fox that walks back and forth along the top edge of its positioned parent. */
+/** A fox that wanders along the top edge of its positioned parent: walks, pauses, turns. */
 export function PixelRunner({ onColourChange, footsteps = false }: PixelRunnerProps) {
   const art = useRef<HTMLSpanElement>(null);
+  const moverRef = useRef<HTMLDivElement>(null);
   const [coloured, setColoured] = useState(false);
 
   // Manual trigger: only clicks change the colour.
@@ -287,20 +288,24 @@ export function PixelRunner({ onColourChange, footsteps = false }: PixelRunnerPr
   };
 
   // Footsteps: watch the walk cycle and play a step when a lifted paw lands (frames 3 and 7).
+  // The animation is re-read every frame: it speeds up or slows down with the walk, and it's
+  // absent while the fox rests, so the sound always matches the paws.
   useEffect(() => {
     if (!footsteps) return;
-    const frameEl = art.current?.querySelector(".pr-f1");
-    const anim = frameEl?.getAnimations()[0];
-    if (!anim) return; // reduced motion: no walk, no steps
     let last = -1;
     let raf = 0;
     const tick = () => {
-      const duration = Number(anim.effect?.getTiming().duration) || 880;
-      const t = Number(anim.currentTime ?? 0);
-      const frame = Math.floor((((t % duration) + duration) % duration) / (duration / 8));
-      if (frame !== last) {
-        if (frame === 2 || frame === 6) playStep();
-        last = frame;
+      const anim = art.current?.querySelector(".pr-f1")?.getAnimations()[0];
+      if (anim && anim.playState === "running") {
+        const duration = Number(anim.effect?.getTiming().duration) || 880;
+        const t = Number(anim.currentTime ?? 0);
+        const frame = Math.floor((((t % duration) + duration) % duration) / (duration / 8));
+        if (frame !== last) {
+          if (frame === 2 || frame === 6) playStep();
+          last = frame;
+        }
+      } else {
+        last = -1;
       }
       raf = requestAnimationFrame(tick);
     };
@@ -308,9 +313,88 @@ export function PixelRunner({ onColourChange, footsteps = false }: PixelRunnerPr
     return () => cancelAnimationFrame(raf);
   }, [footsteps]);
 
+  // Wandering. Math.random picks the decisions (how far, which way, how fast, whether to rest);
+  // the motion between them is smooth, so it reads as natural rather than jittery.
+  useEffect(() => {
+    const mover = moverRef.current;
+    const track = mover?.parentElement;
+    if (!mover || !track) return;
+    const rnd = (a: number, b: number) => a + Math.random() * (b - a);
+    const room = () => Math.max(0, track.clientWidth - mover.offsetWidth);
+    let x = room() * rnd(0.1, 0.35);
+    let facing = 1;
+    let raf = 0;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const place = () => {
+      mover.style.transform = `translate3d(${x.toFixed(1)}px, 0, 0)`;
+    };
+    const setWalking = (walking: boolean) => mover.classList.toggle("is-idle", !walking);
+
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      x = room() / 2;
+      place();
+      setWalking(false);
+      return;
+    }
+
+    const BASE_SPEED = 62; // px/s that matches the 0.88s walk cycle without paws sliding
+    const BASE_CYCLE = 0.88;
+
+    const pickTarget = () => {
+      const w = room();
+      let dir = Math.random() < 0.7 ? facing : -facing; // usually keep going the same way
+      const dist = rnd(110, 380);
+      if (x + dir * dist < 0 || x + dir * dist > w) dir = -dir; // turn back at the edges
+      return Math.max(0, Math.min(w, x + dir * dist));
+    };
+
+    const rest = () => {
+      setWalking(false);
+      timer = setTimeout(() => walkTo(pickTarget()), rnd(1000, 2600));
+    };
+
+    const walkTo = (target: number) => {
+      const from = x;
+      const dist = Math.abs(target - from);
+      if (dist < 8) return rest();
+      facing = target > from ? 1 : -1;
+      mover.classList.toggle("is-left", facing < 0);
+      const speed = rnd(52, 72);
+      // steps keep pace with the speed, so the paws don't slide
+      mover.style.setProperty("--pr-step", `${((BASE_CYCLE * BASE_SPEED) / speed).toFixed(3)}s`);
+      setWalking(true);
+      const duration = (dist / speed) * 1000 + 350; // a little extra for easing in and out
+      const start = performance.now();
+      const tick = (now: number) => {
+        const k = Math.min(1, (now - start) / duration);
+        x = from + (target - from) * (0.5 - 0.5 * Math.cos(Math.PI * k)); // ease in-out
+        place();
+        if (k < 1) raf = requestAnimationFrame(tick);
+        else if (Math.random() < 0.55) rest();
+        else walkTo(pickTarget());
+      };
+      raf = requestAnimationFrame(tick);
+    };
+
+    place();
+    setWalking(false);
+    timer = setTimeout(() => walkTo(pickTarget()), rnd(300, 900));
+
+    const ro = new ResizeObserver(() => {
+      x = Math.min(x, room());
+      place();
+    });
+    ro.observe(track);
+    return () => {
+      cancelAnimationFrame(raf);
+      clearTimeout(timer);
+      ro.disconnect();
+    };
+  }, []);
+
   return (
     <div className="pr-track">
-      <div className="pr-mover">
+      <div ref={moverRef} className="pr-mover is-idle">
         <button
           ref={liquid.ref}
           type="button"

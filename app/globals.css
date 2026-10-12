@@ -621,21 +621,18 @@ p code, li code { background: var(--code-bg); border: 1px solid var(--border); b
   width: var(--pr-w);
   height: var(--pr-h);
   pointer-events: auto;
-  animation: pr-run 16s linear infinite;
+  will-change: transform; /* position set by script (PixelRunner): it wanders, pauses and turns */
 }
-@keyframes pr-run {
-  0% { transform: translateX(0); }
-  49% { transform: translateX(calc(100cqw - var(--pr-w))); }
-  51% { transform: translateX(calc(100cqw - var(--pr-w))); }
-  100% { transform: translateX(0); }
-}
-/* Face the way it's running. Only the drawings are mirrored, not the button, so the liquid
-   still pours from the side the pointer actually comes from. Same duration as pr-run. */
-.pr-sprite { animation: pr-face 16s steps(1) infinite; }
-@keyframes pr-face {
-  0% { transform: scaleX(1); }
-  50% { transform: scaleX(-1); }
-}
+
+/* Face the way it's walking. Only the drawings are mirrored, not the button, so the liquid
+   still pours from the side the click comes from. */
+.pr-mover.is-left .pr-sprite { transform: scaleX(-1); }
+
+/* Resting: no walk cycle, no lean, standing on both paws (frame 8) */
+.pr-mover.is-idle .pr-f { animation: none; opacity: 0; }
+.pr-mover.is-idle .pr-f8 { opacity: 1; }
+.pr-mover.is-idle .pr-runner { animation: none; }
+
 .pr-runner {
   display: block;
   padding: 0;
@@ -688,8 +685,7 @@ p code, li code { background: var(--code-bg); border: 1px solid var(--border); b
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .pr-mover { animation: none; left: 50%; margin-left: calc(var(--pr-w) / -2); }
-  .pr-sprite { animation: none; }
+
   .pr-runner { animation: none; }
   .pr-f { animation: none; }
   .pr-f1 { opacity: 1; }
