@@ -91,7 +91,7 @@ export function playStep(volume = 1, at?: number): void {
   osc.frequency.exponentialRampToValueAtTime(55, t + 0.06);
   const thump = ctx!.createGain();
   thump.gain.setValueAtTime(0.0001, t);
-  thump.gain.exponentialRampToValueAtTime(0.06 * volume, t + 0.005);
+  thump.gain.exponentialRampToValueAtTime(0.03 * volume, t + 0.005); // thump halved
   thump.gain.exponentialRampToValueAtTime(0.0001, t + 0.07);
   osc.connect(thump).connect(out!);
   osc.start(t);
