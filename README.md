@@ -134,10 +134,28 @@ npm run icons        # rebuild the demo logos (Devicon originals → outline + f
 
 | Path | |
 | --- | --- |
-| `lib/liquid/` | The library: `LiquidFill`, `useLiquidFill`, `liquidPolygon` |
-| `app/page.tsx`, `components/docs/`, `docs/` | Documentation site |
+| `lib/liquid/` | The library source: `LiquidFill`, `useLiquidFill`, `liquidPolygon` |
+| `packages/react-liquid-fill/` | The npm package: builds `lib/liquid/` into `dist/` |
+| `app/page.tsx` | Landing page (`/`) |
+| `app/docs/page.tsx`, `components/docs/`, `docs/` | Documentation site (`/docs`) |
 | `components/TechnologyIcon.tsx`, `TechnologyMarquee.tsx`, `Demos.tsx` | Demo components |
 | `scripts/build-icons.mjs`, `data/technologies.json`, `public/technology/` | Demo logo pipeline |
+
+## Publishing to npm
+
+The package lives in `packages/react-liquid-fill/` and builds from `lib/liquid/`, so the site and the package always share the same code. Publishing to npm also makes it installable with yarn and pnpm, which use the same registry.
+
+```bash
+cd packages/react-liquid-fill
+npm install            # build tools only; nothing is added to the published package
+npm run build          # dist/: ESM, CommonJS and types
+npm pack --dry-run     # check the file list (13 files, ~10 kB)
+
+npm login              # once per machine
+npm publish            # runs the build again first
+```
+
+For a new version, bump it with `npm version patch` (or `minor` / `major`) in that folder, then `npm publish`. Update `SITE.version` in `lib/site.ts` to match.
 
 ## License
 
