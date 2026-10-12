@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { useSlidingIndicator } from "@/components/ui/useSlidingIndicator";
 
 export function CodeBlock({ code, language = "tsx", compact = false }: { code: string; language?: string; compact?: boolean }) {
   const pre = useRef<HTMLPreElement>(null);
@@ -39,9 +40,11 @@ export function CodeBlock({ code, language = "tsx", compact = false }: { code: s
 export function InstallTabs({ commands }: { commands: Record<string, string> }) {
   const names = Object.keys(commands);
   const [active, setActive] = useState(names[0]);
+  const { containerRef, indicatorRef } = useSlidingIndicator(active);
   return (
     <div className="install">
-      <div className="install-tabs" role="tablist" aria-label="Package manager">
+      <div ref={containerRef} className="install-tabs" role="tablist" aria-label="Package manager">
+        <span ref={indicatorRef} className="slide-indicator install-indicator" aria-hidden="true" />
         {names.map((n) => (
           <button
             key={n}
@@ -49,6 +52,7 @@ export function InstallTabs({ commands }: { commands: Record<string, string> }) 
             role="tab"
             id={`install-tab-${n}`}
             aria-selected={active === n}
+            data-indicator-key={n}
             className="install-tab"
             onClick={() => setActive(n)}
           >
@@ -56,7 +60,10 @@ export function InstallTabs({ commands }: { commands: Record<string, string> }) 
           </button>
         ))}
       </div>
-      <CodeBlock code={commands[active]} language="bash" compact />
+      {/* keyed so the command cross-fades instead of popping in */}
+      <div className="lp-swap" key={active}>
+        <CodeBlock code={commands[active]} language="bash" compact />
+      </div>
     </div>
   );
 }

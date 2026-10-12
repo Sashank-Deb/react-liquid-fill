@@ -154,7 +154,10 @@ p code, li code { background: var(--code-bg); border: 1px solid var(--border); b
   background: none; border: 1px solid transparent; border-bottom: 0;
   border-radius: 8px 8px 0 0; padding: 5px 12px; cursor: pointer;
 }
-.install-tab[aria-selected="true"] { color: var(--foreground); background: var(--code-bg); border-color: var(--border); }
+.install-tab { position: relative; z-index: 1; transition: color 0.28s ease; }
+.install-tab[aria-selected="true"] { color: var(--foreground); }
+.install-tabs:not([data-indicator-ready]) .install-tab[aria-selected="true"] { background: var(--code-bg); border-color: var(--border); }
+.install-indicator { background: var(--code-bg); border: 1px solid var(--border); border-bottom: 0; border-radius: 8px 8px 0 0; }
 .install .code { margin-top: 0; border-top-left-radius: 0; }
 
 /* ---------------- Demo frame ---------------- */
@@ -482,8 +485,38 @@ p code, li code { background: var(--code-bg); border: 1px solid var(--border); b
   border: 0; border-radius: 7px; padding: 5px 8px; background: transparent; color: var(--secondary);
 }
 .lp-segmented button:hover { color: var(--foreground); }
-/* Selected: accent fill with text in the page background colour, so it reads in both themes */
-.lp-segmented button[aria-checked="true"] { background: var(--accent); color: var(--on-accent); font-weight: 600; box-shadow: 0 1px 2px rgb(0 0 0 / 0.18); }
+/* Selected: accent fill with text in the on-accent colour, so it reads in both themes.
+   The fill is a sliding indicator (useSlidingIndicator); before it's placed, the button paints it. */
+.lp-segmented { position: relative; }
+.lp-segmented button { position: relative; z-index: 1; transition: color 0.28s ease; }
+.lp-segmented button[aria-checked="true"] { color: var(--on-accent); } /* same weight as the others, so widths never shift */
+.lp-segmented:not([data-indicator-ready]) button[aria-checked="true"] { background: var(--accent); }
+.lp-segmented .slide-indicator { border-radius: 7px; background: var(--accent); box-shadow: 0 1px 2px rgb(0 0 0 / 0.18); }
+
+/* Shared sliding highlight */
+.slide-indicator {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 0;
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    transform 0.34s cubic-bezier(0.3, 0.7, 0.2, 1),
+    width 0.34s cubic-bezier(0.3, 0.7, 0.2, 1),
+    height 0.34s cubic-bezier(0.3, 0.7, 0.2, 1);
+}
+
+/* Content that changes with a tab fades up instead of popping in */
+.lp-swap { animation: lp-swap-in 0.28s ease both; }
+@keyframes lp-swap-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .slide-indicator, .lp-segmented button { transition: none; }
+  .lp-swap { animation: none; }
+}
 .lp-segmented button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
 .lp-field input[type="range"] { width: 100%; accent-color: var(--accent); }
 

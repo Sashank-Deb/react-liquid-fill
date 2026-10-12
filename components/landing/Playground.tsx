@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import { useLiquidFill, type LiquidDirection } from "@/lib/liquid";
 import { iconSrc } from "@/lib/technologies";
 import { CodeBlock } from "@/components/docs/CodeBlock";
+import { useSlidingIndicator } from "@/components/ui/useSlidingIndicator";
 
 type Subject = "logo" | "button" | "text";
 type Mode = "hover" | "click";
@@ -16,14 +17,16 @@ const SUBJECT_CODE: Record<Subject, { base: string; fill: string }> = {
 };
 
 function Segmented<T extends string>({ id, label, value, options, onChange }: { id: string; label: string; value: T; options: readonly T[]; onChange: (v: T) => void }) {
+  const { containerRef, indicatorRef } = useSlidingIndicator(value);
   return (
     <div className="lp-field" role="radiogroup" aria-labelledby={`${id}-label`}>
       <span id={`${id}-label`} className="lp-field-label">
         {label}
       </span>
-      <div className="lp-segmented">
+      <div ref={containerRef} className="lp-segmented">
+        <span ref={indicatorRef} className="slide-indicator" aria-hidden="true" />
         {options.map((o) => (
-          <button key={o} id={`${id}-${o}`} type="button" role="radio" aria-checked={value === o} onClick={() => onChange(o)}>
+          <button key={o} id={`${id}-${o}`} type="button" role="radio" aria-checked={value === o} data-indicator-key={o} onClick={() => onChange(o)}>
             {o}
           </button>
         ))}
@@ -88,7 +91,7 @@ export function Playground() {
           tabIndex={0}
           onKeyDown={mode === "click" ? (e) => (e.key === "Enter" || e.key === " ") && (e.preventDefault(), liquid.toggle()) : undefined}
         >
-          <span ref={stage} className="lp-stack">
+          <span ref={stage} className="lp-stack lp-swap" key={subject}>
             {subject === "logo" && (
               <>
                 <img src={iconSrc("outline", "python")} alt="" width={128} height={128} />
