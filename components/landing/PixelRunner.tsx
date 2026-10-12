@@ -3,47 +3,46 @@
 import { LiquidFill } from "@/lib/liquid";
 
 /*
-  An original 8-bit fox drawn on a 22×15 grid, facing right. Two frames make the gallop:
-  legs stretched, then gathered. The greyscale copy is the base; the colour copy is poured in
-  by LiquidFill when the pointer reaches it, or on tap on touch screens.
+  A sitting pixel fox on a 17×17 grid: tall ears with cream tufts, closed happy eyes,
+  pink cheeks, white chest and a big curled tail. It hops along the band (CSS); the greyscale
+  copy is the base and the colour copy is poured in by LiquidFill from the side the pointer
+  comes from, or on tap on touch screens.
 
-  Key: K outline · O fur · o fur shade · W white (tail tip, chest, muzzle) · E eye · N nose
-       D legs · . empty
+  Key: K outline · O fur · o fur shade · W white · w cream · P cheek · E eye / nose / paws · . empty
 */
-const BODY = [
-  "...............K..K...",
-  "..............KoKKoK..",
-  ".KKK..........KOOOOK..",
-  "KWWWK........KOOOOOKK.",
-  "KWWOOK.......KOOEOOOOK",
-  "KWOOOOK.....KOOOOWWWNK",
-  ".KOOOOOKKKKKOOOOWWWKK.",
-  "..KOOOOOOOOOOOOWWWK...",
-  "..KoOOOOOOOOOOOOWK....",
-  "...KooOOOOOOOOOOK.....",
-  "....KKKKKKKKKKKK......",
+const FOX = [
+  ".....K.........K.",
+  "....KoK.......KoK",
+  "....KwoK.....KowK",
+  "....KWoOKKKKKOoWK",
+  "....KWOOOOOOOOOWK",
+  "....KOOOOOOOOOOOK",
+  ".K..KOOOOOOOOOOOK",
+  "KWK.KOOOOOOOOOOOK",
+  "KWWKKWWEEOOOEEWWK",
+  "KWWWKWPPWWOWWPPWK",
+  "KWWWKWWWWWEWWWWWK",
+  "KWWOOKWWWWWWWWWK.",
+  ".KOOOOKKoWWWOKK..",
+  ".KoOOOoKOWWWwK...",
+  "..KooooKoWWWOK...",
+  "...KKooKoEWEoK...",
+  ".....KKKKEKEKK...",
 ];
 
-const FRAMES = [
-  // stretched: front legs reach forward, back legs push off
-  [...BODY, "...KDDK......KDDK.....", "..KDDK........KDDK....", ".KDDK..........KDDK...", ".KKK............KKK..."],
-  // gathered: legs under the body
-  [...BODY, ".....KDK....KDK.......", "....KDDK...KDDK.......", "....KDDK...KDDK.......", "....KKK....KKK........"],
-];
-
-const W = 22;
-const H = 15;
+const W = 17;
+const H = 17;
 
 type Palette = Record<string, string>;
 
 const COLOUR: Palette = {
   K: "currentColor",
-  O: "#e87a2e",
-  o: "#be581e",
-  W: "#faf6ee",
-  E: "#1c1c1a",
-  N: "#1c1c1a",
-  D: "#463028",
+  O: "#e8843f",
+  o: "#c25a26",
+  W: "#f8f4ea",
+  w: "#f2d4b4",
+  P: "#ea968a",
+  E: "#3a2018",
 };
 
 const GREY: Palette = {
@@ -51,13 +50,13 @@ const GREY: Palette = {
   O: "#b2b2aa",
   o: "#94948c",
   W: "#f0f0ea",
-  E: "#3a3a36",
-  N: "#3a3a36",
-  D: "#6b6b65",
+  w: "#d8d8d1",
+  P: "#c8c8c1",
+  E: "#4a4a45",
 };
 
-/** One frame as SVG rects, merging horizontal runs of the same colour to keep the DOM small. */
-function FrameRects({ rows, palette }: { rows: string[]; palette: Palette }) {
+/** SVG rects for the sprite, merging horizontal runs of one colour to keep the DOM small. */
+function Rects({ rows, palette }: { rows: string[]; palette: Palette }) {
   const rects: React.ReactElement[] = [];
   rows.forEach((raw, y) => {
     const row = raw.padEnd(W, ".");
@@ -78,17 +77,12 @@ function FrameRects({ rows, palette }: { rows: string[]; palette: Palette }) {
 function Sprite({ palette }: { palette: Palette }) {
   return (
     <svg className="pr-sprite" viewBox={`0 0 ${W} ${H}`} width={W * 4} height={H * 4} shapeRendering="crispEdges" aria-hidden="true">
-      <g className="pr-frame pr-frame-a">
-        <FrameRects rows={FRAMES[0]} palette={palette} />
-      </g>
-      <g className="pr-frame pr-frame-b">
-        <FrameRects rows={FRAMES[1]} palette={palette} />
-      </g>
+      <Rects rows={FOX} palette={palette} />
     </svg>
   );
 }
 
-/** A fox that runs back and forth along the top edge of its positioned parent. */
+/** A fox that hops back and forth along the top edge of its positioned parent. */
 export function PixelRunner() {
   return (
     <div className="pr-track">
@@ -100,7 +94,7 @@ export function PixelRunner() {
           layersClassName="pr-body"
           aria-label="Pixel fox. Hover or tap to pour colour into it."
           touch="tap-toggle"
-          duration={{ in: 520, out: 380 }}
+          duration={{ in: 560, out: 400 }}
           wave={{ amplitude: 0.22 }}
           base={<Sprite palette={GREY} />}
           fill={<Sprite palette={COLOUR} />}

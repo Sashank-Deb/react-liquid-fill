@@ -597,12 +597,12 @@ p code, li code { background: var(--code-bg); border: 1px solid var(--border); b
   .lp-install code { font-size: 12.5px; }
 }
 
-/* ---------- Pixel fox (runs on top of the final call to action) ---------- */
+/* ---------- Pixel fox (hops along the top of the final call to action) ---------- */
 
 .lp-final {
   position: relative;
-  --pr-w: 88px; /* sprite: 22×15 pixels at 4× */
-  --pr-h: 60px;
+  --pr-w: 68px; /* sprite: 17×17 pixels at 4× */
+  --pr-h: 68px;
 }
 .pr-track {
   position: absolute;
@@ -649,21 +649,24 @@ p code, li code { background: var(--code-bg); border: 1px solid var(--border); b
 .pr-runner:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
 .pr-sprite { display: block; image-rendering: pixelated; transform-origin: center; }
 
-/* two-frame run cycle */
-.pr-frame-a { animation: pr-step-a 0.34s steps(1) infinite; }
-.pr-frame-b { animation: pr-step-b 0.34s steps(1) infinite; }
-@keyframes pr-step-a { 0% { opacity: 1; } 50% { opacity: 0; } }
-@keyframes pr-step-b { 0% { opacity: 0; } 50% { opacity: 1; } }
+/* hop along: up, then a little squash on landing */
+.pr-runner { animation: pr-bounce 0.46s cubic-bezier(0.33, 0, 0.67, 1) infinite; transform-origin: 50% 100%; }
+@keyframes pr-bounce {
+  0%, 100% { transform: translateY(0) scale(1.06, 0.93); }
+  12% { transform: translateY(-2px) scale(1, 1); }
+  50% { transform: translateY(-11px) scale(0.98, 1.03); }
+  88% { transform: translateY(-2px) scale(1, 1); }
+}
 
 /* stop to be coloured in: pause while a mouse is over it, or while it has keyboard focus */
 @media (hover: hover) {
   .pr-mover:hover,
   .pr-mover:hover .pr-sprite,
-  .pr-mover:hover .pr-frame { animation-play-state: paused; }
+  .pr-mover:hover .pr-runner { animation-play-state: paused; }
 }
 .pr-mover:focus-within,
 .pr-mover:focus-within .pr-sprite,
-.pr-mover:focus-within .pr-frame { animation-play-state: paused; }
+.pr-mover:focus-within .pr-runner { animation-play-state: paused; }
 
 /* a little hop when the colour finishes pouring in */
 .pr-runner[data-filled] .pr-body { animation: pr-hop 0.42s cubic-bezier(0.3, 0.7, 0.4, 1) 1; }
@@ -675,8 +678,7 @@ p code, li code { background: var(--code-bg); border: 1px solid var(--border); b
 @media (prefers-reduced-motion: reduce) {
   .pr-mover { animation: none; left: 50%; margin-left: calc(var(--pr-w) / -2); }
   .pr-sprite { animation: none; }
-  .pr-frame-a { animation: none; opacity: 1; }
-  .pr-frame-b { animation: none; opacity: 0; }
+  .pr-runner { animation: none; }
   .pr-runner[data-filled] .pr-body { animation: none; }
 }
 
