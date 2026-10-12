@@ -61,9 +61,13 @@ function crackle(at: number, level: number) {
 }
 
 /** A paw on dry leaves. Middle ground: a few soft crackles over a papery rustle. */
+/** Overall footstep level (crackles, rustle and thump together). */
+const STEP_LEVEL = 0.3;
+
 export function playStep(volume = 1, at?: number): void {
   if (!ready()) return;
   const t = at ?? ctx!.currentTime + 0.005;
+  volume *= STEP_LEVEL;
 
   const n = 4 + Math.floor(Math.random() * 3); // 4–6 crackles, 10–28ms apart, fading
   let offset = 0;
